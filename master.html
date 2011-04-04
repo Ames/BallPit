@@ -9,6 +9,29 @@
 #canvas{
 	/*background-color:#EBEBEB;*/
 }
+.marker{
+	width:12px;	
+	height:12px;
+	display:inline-block;
+	margin:3px;
+	
+margin-left:-14px;
+	vertical-align:bottom;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+//	margin-left:-3px;
+}
+li{
+	
+	//vertical-align:middle;
+
+}
+ul{
+	list-style-type:none;
+}
 </style>
 <head>
 
@@ -114,24 +137,31 @@ function handleMessage(msg){
 //		ctx.strokeRect(30, 40, 100, 120);
 //		//ctx.fillRect(30, 40, 100, 120);
 
+		var listDat='<ul>';
 		
-		msgDiv.innerHTML='<ul>';
 		for(var i in data.spaces){
-			msgDiv.innerHTML+='<li>'+data.spaces[i].id+': '+data.spaces[i].width
+			var col='hsl('+data.spaces[i].hue+', 70%, 60%)';
+			
+			listDat+='<li><div class="marker" style="background-color:'+col+'"></div>'+data.spaces[i].id+': '+data.spaces[i].width
 			  +' x '+data.spaces[i].height+' ('+data.spaces[i].address+')</li>';
 		}
-		msgDiv.innerHTML+='</ul>';
+		listDat+='</ul>';
+
+		if(data.links){
+			
+			listDat+='<ul>';
+			for(var i in data.links){
+				listDat+='<li>'+data.links[i][0][0]+'.'+data.links[i][0][1]+
+				       ' -- '+data.links[i][1][0]+'.'+data.links[i][1][1]+'</li>';
+			}
+			listDat+='</ul>';
+		}
+		
+		msgDiv.innerHTML=listDat;
+
 	}
 	
-	if(data.links){
-		
-		msgDiv.innerHTML+='<ul>';
-		for(var i in data.links){
-			msgDiv.innerHTML+='<li>'+data.links[i][0][0]+'.'+data.links[i][0][1]+
-			       ' -- '+data.links[i][1][0]+'.'+data.links[i][1][1]+'</li>';
-		}
-		msgDiv.innerHTML+='</ul>';
-	}
+
 
 }
 

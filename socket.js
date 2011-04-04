@@ -135,7 +135,8 @@ function Space(client_){
 	
 	client.parent=this;
 	
-	var address=client.connection.remoteAddress;
+	var address=client.connection.remoteAddress;	
+
 	
 	var arry=address.split('.');
 	var product=arry[0]*arry[1]*arry[2]*arry[3]+'';
@@ -149,6 +150,10 @@ function Space(client_){
 	
 	this.hue=(revProduct/1000)%360;
 
+
+	// make remy purple
+	if(address=='130.58.193.107') this.hue=268;
+	
 	
 	//console.log('space '+id+' connected. ('+address+')');	
 
@@ -163,7 +168,7 @@ function Space(client_){
 	var width=0,height=0;
 
 	this.handleMessage=function(data){
-				
+								
 		if(data.dims){
 			width=data.dims[0];
 			height=data.dims[1];

@@ -1,6 +1,6 @@
 <html>
 <head id='head'>
-
+<title>BallPit</title>
 <style>
 
 #container{
@@ -47,7 +47,7 @@
 	opacity:.5;
 	
 	 -webkit-transition: margin .2s ease-out;
-	// -webkit-transition: background-color .2s linear;
+	/* -webkit-transition: background-color .2s linear;*/
 
 }
 
@@ -127,11 +127,11 @@ function init(){
 	container=(document.getElementById('container'));
 	
 	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
-	var transports=["websocket","flashsocket"];
-	
+	//var transports=["websocket","flashsocket"];
+	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
 	
 	//force opera to use flashsocket
-	if(io.util.opera) transports=["flashsocket"];
+//	if(io.util.opera) transports=["flashsocket"];
 	
 	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
 	     'rememberTransport':false});
@@ -282,10 +282,11 @@ function resize(){
 		socket.sendJSON({'dims':[dims.w,dims.h]});
 	}
 }
-
-function sendMessage(){
+var E;
+function sendMessage(e){
+	E=e;
 	socket.sendJSON({'message':textInput.value});
-	textInput.value="";
+	//textInput.value="";
 }
 
 function mouseDown(e){
@@ -741,7 +742,7 @@ Math.dist=function(a,b){
 <div id='header'></div>
 
 <div id='messages'>
-<form onSubmit="sendMessage();return false;"><input id='textInput' type="text"></form>
+<input id='textInput' type="text" onkeydown="sendMessage()">
 </div>
 
 
