@@ -108,6 +108,8 @@ input{
 
 </style>
 
+<script src='favGen.js'></script>
+
 <script type='text/javascript'>
 
 var socketPort=8124;
@@ -304,6 +306,8 @@ function handleMessage(msg){
 			ballColor='hsl('+data.hue+', 70%, 60%)';
 			bgColor='hsl('+data.hue+', 100%, 95%)';
 			container.style.backgroundColor=bgColor;
+			
+			setFavCol(ballColor);
 		}
 		
 			
