@@ -159,6 +159,8 @@ var bgColor='';
 
 var run=true;
 
+var notify = false;
+
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
 
 function init(){
@@ -257,7 +259,7 @@ function handleMessage(msg){
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
-	
+		notify = true;
 		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
 		          +'"></div>'+data.message+'</div>'+msgDiv.innerHTML;
 	}
@@ -672,6 +674,7 @@ function toggleMsg(){
 	if(showMsg){
 		document.getElementById('msgBox').style.visibility='visible';
 		textInput.focus();
+		notify = false;
 	}else{
 		document.getElementById('msgBox').style.visibility='hidden';
 		textInput.blur();
