@@ -50,7 +50,7 @@ body{
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
 	border-radius: 6px;
-	
+
 	overflow-y: auto;
 	max-height: 80%;
 	
@@ -259,9 +259,11 @@ function init(){
 function notifyDisplay(){
 	notDiv=document.getElementById('msgNote');
 	if(!notify){
+		setFavCol(ballColor);
 		notDiv.style.visibility = "hidden";
 	}
 	else{
+		setFavCol("yellow",true);
 		notDiv.style.visibility="visible";
 	}
 }
