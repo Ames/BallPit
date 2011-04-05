@@ -177,7 +177,10 @@ function Space(client_){
 		}
 		
 		if(data.message){
+			data.hue=this.hue;
+			data.address=address;
 			broadcast(data);
+			//console.log('message: '+data);
 		}
 		
 		if(data.ball){

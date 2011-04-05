@@ -1,6 +1,7 @@
 <html>
 <head id='head'>
 <title>BallPit</title>
+<meta http-equiv="X-UA-Compatible" content="IE=8" >
 <style>
 
 #container{
@@ -17,13 +18,49 @@
  	user-select: none;
 }
 
-#messages{
+#msgBox{
 	position: absolute;
-	top:10px;
-	left:30px;
-	background-color:#E8EEFF;
+	top:30px;
+	left:10px;
+	background-color:rgba(0,0,0,.1);
+	
+	//opacity: 0.8;
+	
 	visibility:hidden;
+	
+	border:1px solid #BBB;
+	
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
 }
+#messages{
+	margin:5px 10px;
+}
+form{
+	margin-bottom: 8px;
+}
+input{
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+.marker{
+	width:12px;	
+	height:12px;
+	display:inline-block;
+	margin:3px;
+	
+	margin-left:-5px;
+	vertical-align:bottom;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+//	margin-left:-3px;
+}
+
 .ball{
 	position: absolute;
 	
@@ -41,12 +78,17 @@
 .edgeTab{
 	position: absolute;
 	
-	border-radius:30px;
+	-webkit-border-radius: 40px;
+	-moz-border-radius: 40px;
+	border-radius: 40px;
+
 	background-color:#55f;
 	border: solid 2px black;
 	opacity:.5;
 	
 	 -webkit-transition: margin .2s ease-out;
+	 -moz-transition: margin .2s ease-out;
+	 
 	/* -webkit-transition: background-color .2s linear;*/
 
 }
@@ -78,11 +120,12 @@ if(!document.head)document.head=document.getElementsByTagName('head')[0];
 
 document.head.appendChild(scr);
 
-var msgDiv;
 var container;
 var headDiv;
 var socket;
 var textInput;
+var msgDiv;
+
 
 var id=0;
 
@@ -114,11 +157,16 @@ var hue=0;
 var ballColor='';
 var bgColor='';
 
+var run=true;
+
+var ie=(navigator.appName == 'Microsoft Internet Explorer');
+
 function init(){
 	//	alert('loaded document!');	
 
 	loadedThings++;
-	if(loadedThings<2)return true;
+	if(loadedThings!=2)return true;
+
 
 	textInput=document.getElementById('textInput');
 	headDiv=document.getElementById('header');
@@ -130,6 +178,8 @@ function init(){
 	//var transports=["websocket","flashsocket"];
 	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
 	
+	if(WebSocket)var transports=["websocket"];
+	
 	//force opera to use flashsocket
 //	if(io.util.opera) transports=["flashsocket"];
 	
@@ -137,7 +187,6 @@ function init(){
 	     'rememberTransport':false});
 
 
-	
 	for(var i=0;i<4;i++){
 		edgeTabs[i]=new EdgeTab(i);	
 	}
@@ -160,14 +209,15 @@ function init(){
 	document.onmousedown=mouseDown;
 	document.onmouseup=mouseUp;
 	
+	//document.onkeydown=keyDown;
 	document.onkeydown=keyDown;
 	
 	
-	container.addEventListener("touchmove", touchMove, false);
+	if(!ie) container.addEventListener("touchmove", touchMove, false);
 
 	
 	setInterval('step()',50);
-	setInterval('keepAlive()',2000); //2 seconds
+	setInterval('keepAlive()',5000); //2 seconds
 	
 	//new Ball(100,200,6,4);
 	
@@ -184,6 +234,10 @@ function keepAlive(){
 scr.onload=init;
 window.onload=init;
 
+if(ie){
+ 	setTimeout("init()",2000);
+}
+
 function handleConnect(){
 	socket.sendJSON({'declare':'space'});	
 	resize();
@@ -199,45 +253,51 @@ function handleMessage(msg){
 	
 	var data=JSON.parse(msg);
 	
+
 	if(data.message){
-		msgDiv.innerHTML+=data.message+'<br>';
+		//var msgTxt=+';
+		var col='hsl('+data.hue+', 70%, 60%)';
+	
+		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
+		          +'"></div>'+data.message+'</div>'+msgDiv.innerHTML;
 	}
 	
 	if(data.id){
 		id=data.id;
 		headDiv.innerHTML=data.id;
-	}
-	
-	if(data.address){
-		address=data.address;
-		
-//		//will this always work?
-//		
-//		var arry=address.split('.');
-//		var product=arry[0]*arry[1]*arry[2]*arry[3]+'';
-//		
-//		var revProduct='';
-//		for(var i in product){
-//			revProduct=product[i]+revProduct;
-//		}
-//		
-//		rp=revProduct;
-//		
-//		hue=(revProduct/1000)%360;
-//		
-//		ballColor='hsl('+hue+', 70%, 60%)';
-//		bgColor='hsl('+hue+', 100%, 95%)';
-//		container.style.backgroundColor=bgColor;
-//		
-		
-	}
-	
-	if(data.hue){
-		hue=data.hue;
 
-		ballColor='hsl('+hue+', 70%, 60%)';
-		bgColor='hsl('+hue+', 100%, 95%)';
-		container.style.backgroundColor=bgColor;
+	
+		if(data.address){
+			address=data.address;
+			
+	//		//will this always work?
+	//		
+	//		var arry=address.split('.');
+	//		var product=arry[0]*arry[1]*arry[2]*arry[3]+'';
+	//		
+	//		var revProduct='';
+	//		for(var i in product){
+	//			revProduct=product[i]+revProduct;
+	//		}
+	//		
+	//		rp=revProduct;
+	//		
+	//		hue=(revProduct/1000)%360;
+	//		
+		}
+		
+		if(data.hue){
+			ballColor='hsl('+data.hue+', 70%, 60%)';
+			bgColor='hsl('+data.hue+', 100%, 95%)';
+			container.style.backgroundColor=bgColor;
+		}
+		
+			
+		if(data.hues){
+			hues=data.hues;
+			upTabs();
+		}
+		
 	}
 	
 	if(data.links){
@@ -245,11 +305,7 @@ function handleMessage(msg){
 		upTabs();
 	}
 	
-	if(data.hues){
-		hues=data.hues;
-		upTabs();
-	}
-	
+
 	if(data.global){
 		if(data.global.k) spawnBalls();
 		if(data.global.f) freeze();
@@ -282,19 +338,37 @@ function resize(){
 		socket.sendJSON({'dims':[dims.w,dims.h]});
 	}
 }
+
 var E;
-function sendMessage(e){
-	E=e;
-	socket.sendJSON({'message':textInput.value});
-	//textInput.value="";
+
+function handleText(e){
+
+		textInput=document.getElementById('textInput');
+
+		sendMessage(textInput.value);
+		textInput.value="";
 }
 
+function sendMessage(msg){
+	socket.sendJSON({'message':msg});
+}
+
+var E;
 function mouseDown(e){
-	mouse0=[e.clientX,e.clientY];
+	//E=e;
+	if (!e) var e = window.event;
+	
+	if(e.target.id=='container'){
+		mouse0=[e.clientX,e.clientY];
+	}
 }
 
 function mouseUp(e){
-	new Ball(e.clientX,e.clientY,(e.clientX-mouse0[0])*.1,(e.clientY-mouse0[1])*.1);
+	if (!e) var e = window.event;
+	
+	if(e.target.id=='container'){	
+		new Ball(e.clientX,e.clientY,(e.clientX-mouse0[0])*.1,(e.clientY-mouse0[1])*.1);
+	}
 }
 
 window.ondeviceorientation=function(e){
@@ -304,43 +378,76 @@ window.ondeviceorientation=function(e){
 
 var avgShake=0;
 
-window.addEventListener("devicemotion", function(event) {
-	// Process event.acceleration, event.accelerationIncludingGravity,
-	// event.rotationRate and event.interval
-	accX = event.acceleration.x;
-	accY = event.acceleration.y;
-	accZ = event.acceleration.z;
-	if(!accX){
-		accX = 0;
-	}
-	if(!accY){
-		accY = 0;
-	}
-	if(!accZ){
-		accZ = 0;
-	}
-	avgShake=(avgShake*9+Math.dist(accX,accY,accZ))/10;
-	
-	//message(avgShake);
 
-	//document.body.style.backgroundColor="#"+parseInt(avgShake*16, 16)+"0000";
-	
-	if(avgShake>8){
+var accX=0;
+var accY=0;
+var accZ=0;
+
+if(!ie){
+	window.addEventListener("devicemotion", function(event) {
+		// Process event.acceleration, event.accelerationIncludingGravity,
+		// event.rotationRate and event.interval
 		
-		for(var i in balls){
-			balls[i].remove();
-		}
-		particles=[];
-	
-	}
-}, true);
+//		var txt="";
+//		
+//		for(var i in event){
+//			txt+=i+": "+event[i]+"<br>";	
+//			
+//		}
+//		
+//		txt+="<br>";
+//		
+//		for(var i in event.accelerationIncludingGravity){
+//			txt+=i+": "+event.accelerationIncludingGravity[i]+"<br>";	
+//			
+//		}
+//		
+//		headDiv.innerHTML=txt;
 
-function Ball(xi,yi,vxi,vyi,ri,color){
+		
+		//if(event.accelerationIncludingGravity){
+
+			accX = event.accelerationIncludingGravity.x;
+			accY = event.accelerationIncludingGravity.y;
+			accZ = event.accelerationIncludingGravity.z;
+			
+			gravityX=accX/10;
+			gravityY=-accY/10;
+			
+		//}
+		if(!accX){
+			accX = 0;
+		}
+		if(!accY){
+			accY = 0;
+		}
+		if(!accZ){
+			accZ = 0;
+		}
+		avgShake=(avgShake*9+Math.dist(accX,accY,accZ))/10;
+		
+		//message(avgShake);
+	
+		//document.body.style.backgroundColor="#"+parseInt(avgShake*16, 16)+"0000";
+		
+		if(avgShake>12){
+			
+			for(var i in balls){
+				balls[i].remove();
+			}
+			balls=[];
+		}
+	}, true);
+}
+
+function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	this.x=xi;
 	this.y=yi;
 	this.vx=vxi;
 	this.vy=vyi;
+	
+	this.type=type||'ball';
 	
 	this.color=color||ballColor;
 	
@@ -433,6 +540,8 @@ function Ball(xi,yi,vxi,vyi,ri,color){
 	
 	balls.push(this);
 	
+	this.update();
+	
 	this.doCollide=function(p){
 		
 		var p1=this;
@@ -479,31 +588,34 @@ function step(){
 				
 	//collisions!
 	
+	if(run){
 	
-	//for each particle
-	for(var i1 in balls){
-		// for each particle farther in the list (upper right triangle)
-		for(var i2=i1;i2<balls.length;i2++){
-			//if not on the diagonal
-			if(i1!=i2){
-				//calculate collision
-				balls[i1].doCollide(balls[i2],i2);
+		//for each particle
+		for(var i1 in balls){
+			// for each particle farther in the list (upper right triangle)
+			for(var i2=i1;i2<balls.length;i2++){
+				//if not on the diagonal
+				if(i1!=i2){
+					//calculate collision
+					balls[i1].doCollide(balls[i2],i2);
+				}
 			}
 		}
-	}
-	
-	for(var i in balls){
-		balls[i].step();
-		balls[i].update();	
-	}
-
-	
-	
-	//clean up dead balls
-	for(var i=balls.length-1;i>=0;i--){
-		if(balls[i].removed){
-			balls.splice(i,1);
+		
+		for(var i in balls){
+			balls[i].step();
+			balls[i].update();	
 		}
+	
+		
+		
+		//clean up dead balls
+		for(var i=balls.length-1;i>=0;i--){
+			if(balls[i].removed){
+				balls.splice(i,1);
+			}
+		}
+	
 	}
 }
 
@@ -518,6 +630,23 @@ function spawnBalls(){
 	             Math.random()*defRad/3*2+defRad/3);
 	}
 }
+
+
+function spawnBurst(){
+	var nParts=100;
+	
+	for(var i=1;i<nParts;i++){
+		var r=Math.random()*dims.w/10;
+		var t=Math.random()*Math.PI*2;
+		
+		new Ball(r*Math.cos(t)+dims.w/2,
+	             r*Math.sin(t)+dims.h/2,
+	             r*Math.cos(t)*.5,
+	             r*Math.sin(t)*.5,
+	             Math.random()*defRad/3*2+defRad/3);
+	}
+}
+
 
 function clear(){
 	for(i in balls){
@@ -535,6 +664,18 @@ function toggleTabs(show){
 	}
 }
 
+var showMsg=false;
+
+function toggleMsg(){
+	showMsg=!showMsg;
+	if(showMsg){
+		document.getElementById('msgBox').style.visibility='visible';
+		textInput.focus();
+	}else{
+		document.getElementById('msgBox').style.visibility='hidden';
+	}
+}
+
 function upTabs(){
 	for(var i in edgeTabs){
 		edgeTabs[i].setHue(hues[i]);
@@ -547,7 +688,7 @@ function EdgeTab(edge){
 	//edge is 0,1,2,3
 	
 	var width =120;
-	var length=160;
+	var length=150;
 	
 	var pos=0;
 
@@ -588,9 +729,9 @@ function EdgeTab(edge){
 	
 	//backgound, border, pos
 	var styles=[
-		['#DDD','#AAA', .65],         //unlinked
+		['#DDD','#AAA', .6],         //unlinked
 		['#A699E5','#815DE9', .35],   //linked //linked will get a special color
-		['#888','#222', .8]];  //selected
+		['#888','#222', .75]];  //selected
 
 	//backgound, border, pos
 //	var styles=[
@@ -613,10 +754,12 @@ function EdgeTab(edge){
 		//alert('ho!');
 		
 		this.state=state;
-
-		this.div.style.backgroundColor=styles[this.state][0];
-		this.div.style.borderColor=styles[this.state][1];
-		
+	
+		if(!ie){
+			this.div.style.backgroundColor=styles[this.state][0];
+			this.div.style.borderColor=styles[this.state][1];
+		}
+	
 		this.setPos(styles[this.state][2]);
 
 	}
@@ -640,7 +783,7 @@ function EdgeTab(edge){
 			this.setState(2);
 		}
 
-		balls[balls.length-1].remove();
+	//	balls[balls.length-1].remove();
 //		
 //		this.state--;
 //		
@@ -653,7 +796,7 @@ function EdgeTab(edge){
 
 	this.div.onclick=function(e){
 		self.click();
-		E=e;
+		//E=e;
 	}
 	
 	this.div.touchStart=function(e){
@@ -679,42 +822,61 @@ touchMove=function(e){
 var E;
 
 function keyDown(e){
-	//lastEvent=e;
-	//message(e.keyCode)
-	switch(e.keyCode){
-		
-		case 32: //space
-			run=!run;
-			break;
-		case 75: //k
-			spawnBalls();
-			break;
-		case 88: //x
-			clear();
-			break;
-		case 38: //up
-			gravityY-=.1;
-			break;
-			
-		case 40: //down
-			gravityY+=.1;
-			break;
-			
-		case 39: //right
-			gravityX+=.1;
-			break;
-			
-		case 37: //left
-			gravityX-=.1;
-			break;
-			
-		 case 70: //f
-			freeze();
-			break;
-		 case 76: //l
-			toggleTabs();
-			break;
+	if (!e) var e = window.event;
 
+	//E=e;
+	
+	if(e.target.id != 'textInput' || e.which==27){
+
+		var code;
+		if (e.keyCode) code = e.keyCode;
+		else if (e.which) code = e.which;	//lastEvent=e;
+		
+		//message(e.keyCode)
+		switch(code){
+			
+			case 32: //space
+				run=!run;
+				break;
+			case 27: //esc
+				toggleMsg();
+				break;
+			case 76: //l
+				spawnBurst();
+				break;
+			case 75: //k
+				spawnBalls();
+				break;
+			case 88: //x
+				clear();
+				break;
+			case 38: //up
+				gravityY-=.1;
+				break;
+				
+			case 40: //down
+				gravityY+=.1;
+				break;
+				
+			case 39: //right
+				gravityX+=.1;
+				break;
+				
+			case 37: //left
+				gravityX-=.1;
+				break;
+			 case 70: //f
+				freeze();
+				break;
+			 case 71: //g
+				gravityX=0;
+				gravityY=0;
+				break;
+			 case 76: //l
+				toggleTabs();
+				break;
+	
+		}
 	}
 
 }
@@ -739,10 +901,12 @@ Math.dist=function(a,b){
 <div id='container'>
 
 </div>
+
 <div id='header'></div>
 
-<div id='messages'>
-<input id='textInput' type="text" onkeydown="sendMessage()">
+<div id='msgBox'>
+<form action="?" onsubmit="handleText();return false;"><input id='textInput' type="text"></form>
+<div id='messages'></div>
 </div>
 
 
