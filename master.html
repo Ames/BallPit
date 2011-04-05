@@ -1,13 +1,18 @@
 <html>
-<style>
+<head>
+<title>BallPit Control Panel</title>
+<style type='text/css'>
+
+
+body{
+	font-family: 'lucida grande', arial, serif;
+}
+
 #box{
 	position:absolute;
 	top:0px;
 	left:0px;
 	padding:20px;	
-}
-#canvas{
-	/*background-color:#EBEBEB;*/
 }
 .marker{
 	width:12px;	
@@ -33,7 +38,6 @@ ul{
 	list-style-type:none;
 }
 </style>
-<head>
 
 <script type='text/javascript'>
 
@@ -61,11 +65,9 @@ var textInput;
 
 var master;
 
-var canvas;
 
 function init(){
 	
-	canvas=document.getElementById('canvas');
 	
 	headDiv=document.getElementById('header');
 	msgDiv=document.getElementById('messages');
@@ -122,21 +124,6 @@ function handleMessage(msg){
 	
 	if(data.spaces){
 		
-		//canvas or raphael, that is the question...
-		
-		//we should draw elsewhere, and perhaps update only when necessary
-		
-//		canvas.width=document.width-20;
-//		canvas.height=document.height-20;
-//		var ctx = canvas.getContext('2d');
-//		
-//		ctx.fillStyle = "rgb(200,0,0)";
-//		ctx.strokeStyle = "rgb(,0,0)";
-//		ctx.lineWidth = "4";
-//		
-//		ctx.strokeRect(30, 40, 100, 120);
-//		//ctx.fillRect(30, 40, 100, 120);
-
 		var listDat='<ul>';
 		
 		for(var i in data.spaces){
@@ -200,8 +187,6 @@ function sendMessage(){
 
 </head>
 <body onload='init()'>
-
-<canvas id='canvas'></canvas>
 
 <div id='box'>
 	
