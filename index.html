@@ -374,7 +374,7 @@ function handleMessage(msg){
 			case 2: x=(b.loc)*dims.w; y=dims.h;vx= b.vel[1]; vy=-b.vel[0]; break;	
 			case 3: x=dims.w; y=(1-b.loc)*dims.h;vx=-b.vel[0]; vy=-b.vel[1]; break;
 		}
-		new Ball(x,y,vx,vy,data.ball.r,data.ball.color);
+		new Ball(x,y,vx,vy,data.ball.r,data.ball.color,data.ball.type);
 	}
 }
 
@@ -509,6 +509,8 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	this.color=color||ballColor;
 	
+	var zombieColor='rgb(67,67,67)';
+	
 	this.r=ri || defRad;
 	
 	this.density=.001;
@@ -522,8 +524,16 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	this.div.style.backgroundColor=this.color;
 	
 	this.removed=false;
-		
+	
+	this.infected=(this.type=='plagued');
+
 	this.step=function(){
+		
+		//plague
+		if(this.infected){
+			this.setR(this.r-.5);
+			if(this.r<4)this.remove();
+		}
 		
 		//gravity
 		this.vx+=gravityX;
@@ -572,7 +582,8 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 			'loc':loc,
 			'vel':vel,
 			'r':this.r,
-			'color':this.color //more to come...
+			'color':this.color,
+			'type':this.type //more to come...
 		};
 		
 		socket.sendJSON(parcel);
@@ -580,14 +591,24 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		this.remove();
 	}
 	
-	this.update=function(){
-		this.div.style.width=this.r*2+'px';
-		this.div.style.height=this.r*2+'px';
-		
+	//this happens a lot
+	this.upLoc=function(){
 		this.div.style.top=this.y-this.r+'px';
 		this.div.style.left=this.x-this.r+'px';
 	}
+	
+	//this rarely needs to happen
+	this.upR=function(){
+		this.div.style.width=this.r*2+'px';
+		this.div.style.height=this.r*2+'px';
+	}
 		
+	this.setR=function(newR){
+		this.r=newR;
+		this.m=Math.PI*this.r*this.r*this.density;
+		this.upR();
+	}
+	
 	this.remove=function(){
 		if(!this.removed){
 			this.removed=true;
@@ -598,7 +619,8 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	balls.push(this);
 	
-	this.update();
+	this.upLoc();
+	this.upR();
 	
 	this.doCollide=function(p){
 		
@@ -611,6 +633,9 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		var dm=Math.dist(dx,dy); //dist mag
  
 		if(dm<(p1.r+p2.r)){
+		
+			if(p1.infected && !p2.infected)p2.infect();
+			if(p2.infected && !p1.infected)p1.infect();
 		
 			if(!dm)dm+=.001; //don't divide by 0 :)
 
@@ -629,7 +654,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 			p2.vy-=vom*dyu*p1.m;
  
 			//uncollide
-			var dma = dm-p1.r-p2.r//adjusted for radius
+			var dma = dm-p1.r-p2.r;//adjusted for radius
  
 			p1.x+=(dma*dxu)/2;
 			p1.y+=(dma*dyu)/2;
@@ -638,6 +663,13 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 			p2.y-=(dma*dyu)/2;
 		}
  
+	}
+	
+	this.infect=function(){
+		this.type='plagued';
+		this.infected=true;
+		this.color=zombieColor;
+		this.div.style.backgroundColor=this.color;
 	}
 
 }
@@ -662,7 +694,7 @@ function step(){
 		
 		for(var i in balls){
 			balls[i].step();
-			balls[i].update();	
+			balls[i].upLoc();	
 		}
 	
 		
@@ -936,7 +968,13 @@ function keyDown(e){
 			 case 191: // /
 				toggleTabs();
 				break;
-	
+			case 73: //i
+				
+				if(balls.length){
+					balls[Math.round(Math.random()*(balls.length-1))].infect();
+				}
+
+				break;
 		}
 	}
 
