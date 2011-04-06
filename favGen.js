@@ -20,19 +20,25 @@ var setFavCol=function(col,notify){
       ctx.fill();
 
 
-		//var head=document.getElementsByTagName('head')[0];
-		var head=document.getElementsByTagName('body')[0];
+		var head=document.getElementsByTagName('head')[0];
+		//var head=document.getElementsByTagName('body')[0];
 
 		if(!favLink){
 			favLink=document.createElement('link');
 			favLink.rel='icon';
-		}else{
-			head.removeChild(favLink);
+			favLink.type = "image/png";  //this fixed it.
+			head.appendChild(favLink);
 		}
-
-	//I think we have caching issues
-
-      favLink.href = canvas.toDataURL('image/png');
-		head.appendChild(favLink);
+		
+		favLink.href = canvas.toDataURL('image/png');
     }
 }
+
+var removeFav=function(){
+	var head=document.getElementsByTagName('head')[0];
+	
+	head.removeChild(favLink);
+	favLink=undefined;
+}
+
+
