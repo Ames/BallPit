@@ -337,21 +337,6 @@ function handleMessage(msg){
 	
 		if(data.address){
 			address=data.address;
-			
-	//		//will this always work?
-	//		
-	//		var arry=address.split('.');
-	//		var product=arry[0]*arry[1]*arry[2]*arry[3]+'';
-	//		
-	//		var revProduct='';
-	//		for(var i in product){
-	//			revProduct=product[i]+revProduct;
-	//		}
-	//		
-	//		rp=revProduct;
-	//		
-	//		hue=(revProduct/1000)%360;
-	//		
 		}
 		
 		if(data.hue){
@@ -360,7 +345,6 @@ function handleMessage(msg){
 			container.style.backgroundColor=bgColor;
 			
 			setFavCol(ballColor);
-			//setFavCol('black');
 		}
 	}
 	
