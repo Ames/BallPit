@@ -252,8 +252,9 @@ function init(){
 	if(!ie) notDiv.addEventListener("touchstart", clickNotify, false);
 
 	
-//	setInterval('step()',50);
-	setInterval('step()',40);
+	setInterval('step()',50); //20fps
+//	setInterval('step()',40); //25fps
+
 	setInterval('keepAlive()',5000); //2 seconds
 	//setInterval('notifyDisplay()',1000);
 	
@@ -525,7 +526,6 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	this.removed=false;
 	
-	this.infected=(this.type=='plagued');
 
 	this.step=function(){
 		
@@ -591,10 +591,13 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		this.remove();
 	}
 	
-	//this happens a lot
+	//this happens a lot  -  it's really slow.
 	this.upLoc=function(){
-		this.div.style.top=this.y-this.r+'px';
-		this.div.style.left=this.x-this.r+'px';
+//		this.div.style.top=this.y-this.r+'px';
+//		this.div.style.left=this.x-this.r+'px';
+
+		this.div.style.top=Math.round(this.y-this.r)+'px';
+		this.div.style.left=Math.round(this.x-this.r)+'px';
 	}
 	
 	//this rarely needs to happen
@@ -602,7 +605,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		this.div.style.width=this.r*2+'px';
 		this.div.style.height=this.r*2+'px';
 	}
-		
+	
 	this.setR=function(newR){
 		this.r=newR;
 		this.m=Math.PI*this.r*this.r*this.density;
@@ -622,7 +625,11 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	this.upLoc();
 	this.upR();
 	
+	//this happens a lot too
 	this.doCollide=function(p){
+		
+		//faster?
+		//if((p.x-this.x)*(p.x-this.x)+(p.y-this.y)*(p.y-this.y)<(p.r+this.r)*(p.r+this.r)){
 		
 		var p1=this;
 		var p2=p;
@@ -670,6 +677,10 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		this.infected=true;
 		this.color=zombieColor;
 		this.div.style.backgroundColor=this.color;
+	}
+	
+	if(this.type=='plagued'){
+		this.infect();	
 	}
 
 }
@@ -946,7 +957,7 @@ function keyDown(e){
 			case 38: //up
 				gravityY-=.1;
 				break;
-				
+
 			case 40: //down
 				gravityY+=.1;
 				break;
