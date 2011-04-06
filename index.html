@@ -52,15 +52,15 @@ body{
 	-moz-border-radius: 6px;
 	border-radius: 6px;
 
-	overflow-y: auto;
-	max-height: 80%;
-	
+//	max-height: 80%;
+
 	min-width:150px;
 	max-width:500px;
 	
 }
 #messages{
-	margin:5px 10px;
+	max-height: 200px;
+	overflow-y: auto;
 }
 form{
 	margin-bottom: 8px;
@@ -78,7 +78,7 @@ input{
 	display:inline-block;
 	margin:3px;
 	
-	margin-left:-5px;
+	//margin-left:-5px;
 	vertical-align:bottom;
 
 	-webkit-border-radius: 3px;
@@ -306,8 +306,16 @@ function handleMessage(msg){
 			notify=true;
 			notifyDisplay();
 		}
-		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
-		          +'"></div>'+unescape(data.message)+'</div>'+msgDiv.innerHTML;
+		
+		
+		var newMsg=document.createElement('div');
+		
+		newMsg.title=data.address;
+		
+		newMsg.innerHTML='<div class="marker" style="background-color:'+col
+		          +'"></div>'+unescape(data.message);
+		
+		msgDiv.insertBefore(newMsg,msgDiv.firstChild)
 	}
 	
 	if(data.id){
@@ -384,6 +392,11 @@ function resize(){
 	//	dims.h=document.height;
 		
 		socket.sendJSON({'dims':[dims.w,dims.h]});
+	}
+	
+	if(msgDiv){
+		msgDiv.style.maxHeight=dims.h-100+'px';
+		//messages.scrollTop=0; //do we want to scroll to top?
 	}
 }
 
