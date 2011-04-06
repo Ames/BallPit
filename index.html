@@ -194,7 +194,7 @@ function init(){
 	//var transports=["websocket","flashsocket"];
 	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
 	
-	if(WebSocket)var transports=["websocket"];
+	//if(WebSocket)var transports=["websocket"];
 	
 	//force opera to use flashsocket
 //	if(io.util.opera) transports=["flashsocket"];
@@ -232,7 +232,8 @@ function init(){
 	if(!ie) container.addEventListener("touchmove", touchMove, false);
 
 	
-	setInterval('step()',50);
+//	setInterval('step()',50);
+	setInterval('step()',40);
 	setInterval('keepAlive()',5000); //2 seconds
 	
 	//new Ball(100,200,6,4);
@@ -275,7 +276,7 @@ function handleMessage(msg){
 		var col='hsl('+data.hue+', 70%, 60%)';
 		notify = true;
 		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
-		          +'"></div>'+data.message+'</div>'+msgDiv.innerHTML;
+		          +'"></div>'+unescape(data.message)+'</div>'+msgDiv.innerHTML;
 	}
 	
 	if(data.id){
@@ -364,7 +365,7 @@ function handleText(e){
 
 		textInput=document.getElementById('textInput');
 
-		sendMessage(textInput.value);
+		sendMessage(escape(textInput.value));
 		textInput.value="";
 }
 
