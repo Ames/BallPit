@@ -154,7 +154,7 @@ var headDiv;
 var socket;
 var textInput;
 var msgDiv;
-
+var notDiv;
 
 var id=0;
 
@@ -202,6 +202,7 @@ function init(){
 	textInput=document.getElementById('textInput');
 	headDiv=document.getElementById('header');
 	msgDiv=document.getElementById('messages');
+	notDiv=document.getElementById('msgNote');
 	
 	container=(document.getElementById('container'));
 	
@@ -246,6 +247,10 @@ function init(){
 	
 	if(!ie) container.addEventListener("touchmove", touchMove, false);
 
+
+	notDiv.onclick=clickNotify;
+	if(!ie) notDiv.addEventListener("touchstart", clickNotify, false);
+
 	
 //	setInterval('step()',50);
 	setInterval('step()',40);
@@ -258,8 +263,15 @@ function init(){
 
 }
 
+function clickNotify(){
+	notify=false;
+	notifyDisplay();
+	
+	showMsg=false;
+	toggleMsg();
+}
+
 function notifyDisplay(){
-	var notDiv=document.getElementById('msgNote');
 	if(!notify){
 		setFavCol(ballColor);
 		notDiv.style.visibility = "hidden";
@@ -302,7 +314,7 @@ function handleMessage(msg){
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
-		if(col!=ballColor && !showMsg && !notify){
+		if(/*col!=ballColor && */!showMsg && !notify){
 			notify=true;
 			notifyDisplay();
 		}
