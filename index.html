@@ -28,7 +28,7 @@ body{
 	height:20px;
 	background-color:yellow;
 	border-color:black;
-	border:dotted 4px;
+	border:dotted 3px;
 	opacity:0.4;
 	visibility:hidden;
 	-webkit-border-radius: 150px;
@@ -38,7 +38,8 @@ body{
 #msgBox{
 	position: absolute;
 	top:30px;
-	left:25px;
+	/*left:25px; they should never conflict */
+	left:10px;
 	background-color:rgba(0,0,0,.1);
 	
 	//opacity: 0.8;
@@ -249,7 +250,7 @@ function init(){
 //	setInterval('step()',50);
 	setInterval('step()',40);
 	setInterval('keepAlive()',5000); //2 seconds
-	setInterval('notifyDisplay()',1000);
+	//setInterval('notifyDisplay()',1000);
 	
 	//new Ball(100,200,6,4);
 	
@@ -258,7 +259,7 @@ function init(){
 }
 
 function notifyDisplay(){
-	notDiv=document.getElementById('msgNote');
+	var notDiv=document.getElementById('msgNote');
 	if(!notify){
 		setFavCol(ballColor);
 		notDiv.style.visibility = "hidden";
@@ -301,8 +302,11 @@ function handleMessage(msg){
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
-		if(col != ballColor && !showMsg){
-			notify=true;
+		if(col!=ballColor && !showMsg){
+			if(!notify){
+				notify=true;
+				notifyDisplay();
+			}
 		}
 		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
 		          +'"></div>'+unescape(data.message)+'</div>'+msgDiv.innerHTML;
@@ -339,9 +343,6 @@ function handleMessage(msg){
 			
 			setFavCol(ballColor);
 		}
-		
-			
-		
 	}
 	
 	if(data.hues){
@@ -713,7 +714,7 @@ function toggleTabs(show){
 	}
 }
 
-var showMsg=false;
+var showMsg=true;
 
 function toggleMsg(){
 	showMsg=!showMsg;
@@ -721,6 +722,7 @@ function toggleMsg(){
 		document.getElementById('msgBox').style.visibility='visible';
 		textInput.focus();
 		notify = false;
+		notifyDisplay();
 	}else{
 		document.getElementById('msgBox').style.visibility='hidden';
 		textInput.blur();

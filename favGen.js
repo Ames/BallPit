@@ -1,3 +1,5 @@
+var favLink;
+
 var setFavCol=function(col,notify){
     
     var canvas = document.createElement('canvas'),
@@ -17,11 +19,20 @@ var setFavCol=function(col,notify){
       ctx.closePath();
       ctx.fill();
 
-      var favLink=document.createElement('link');
-      favLink.rel='icon';
+
+		//var head=document.getElementsByTagName('head')[0];
+		var head=document.getElementsByTagName('body')[0];
+
+		if(!favLink){
+			favLink=document.createElement('link');
+			favLink.rel='icon';
+		}else{
+			head.removeChild(favLink);
+		}
+
+	//I think we have caching issues
 
       favLink.href = canvas.toDataURL('image/png');
-      document.body.appendChild(favLink);
-
+		head.appendChild(favLink);
     }
 }
