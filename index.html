@@ -20,11 +20,25 @@ body{
  	-moz-user-select: none;
  	user-select: none;
 }
-
+#msgNote{
+	position: absolute;
+	top:30px;
+	left:5px;
+	width:20px;
+	height:20px;
+	background-color:yellow;
+	border-color:black;
+	border:dotted 4px;
+	opacity:0.4;
+	visibility:hidden;
+	-webkit-border-radius: 150px;
+	-moz-border-radius: 150px;
+	border-radius: 100px;
+}
 #msgBox{
 	position: absolute;
 	top:30px;
-	left:10px;
+	left:25px;
 	background-color:rgba(0,0,0,.1);
 	
 	//opacity: 0.8;
@@ -36,7 +50,7 @@ body{
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
 	border-radius: 6px;
-	
+
 	overflow-y: auto;
 	max-height: 80%;
 	
@@ -235,11 +249,24 @@ function init(){
 //	setInterval('step()',50);
 	setInterval('step()',40);
 	setInterval('keepAlive()',5000); //2 seconds
+	setInterval('notifyDisplay()',1000);
 	
 	//new Ball(100,200,6,4);
 	
 	resize();
 
+}
+
+function notifyDisplay(){
+	notDiv=document.getElementById('msgNote');
+	if(!notify){
+		setFavCol(ballColor);
+		notDiv.style.visibility = "hidden";
+	}
+	else{
+		setFavCol("yellow",true);
+		notDiv.style.visibility="visible";
+	}
 }
 
 function keepAlive(){
@@ -274,7 +301,9 @@ function handleMessage(msg){
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
-		notify = true;
+		if(col != ballColor && !showMsg){
+			notify=true;
+		}
 		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
 		          +'"></div>'+unescape(data.message)+'</div>'+msgDiv.innerHTML;
 	}
@@ -925,7 +954,7 @@ Math.dist=function(a,b){
 </div>
 
 <div id='header'></div>
-
+<div id='msgNote'></div>
 <div id='msgBox'>
 <form action="?" onsubmit="handleText();return false;"><input id='textInput' type="text"></form>
 <div id='messages'></div>
