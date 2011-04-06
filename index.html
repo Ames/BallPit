@@ -302,11 +302,9 @@ function handleMessage(msg){
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
-		if(col!=ballColor && !showMsg){
-			if(!notify){
-				notify=true;
-				notifyDisplay();
-			}
+		if(col!=ballColor && !showMsg && !notify){
+			notify=true;
+			notifyDisplay();
 		}
 		msgDiv.innerHTML='<div title="'+data.address+'"><div class="marker" style="background-color:'+col
 		          +'"></div>'+unescape(data.message)+'</div>'+msgDiv.innerHTML;
