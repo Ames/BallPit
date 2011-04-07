@@ -563,6 +563,9 @@ function step(){
 	
 	if(run){
 	
+		for(var i in balls)balls[i].step();
+
+
 		//for each particle
 		for(var i1 in balls){
 			// for each particle farther in the list (upper right triangle)
@@ -575,11 +578,12 @@ function step(){
 			}
 		}
 		
-		for(var i in balls){
-			balls[i].step();
-			balls[i].upLoc();	
-		}
-	
+		for(var i in balls)balls[i].upLoc();
+
+//		for(var i in balls){
+//			balls[i].step();
+//			balls[i].upLoc();	
+//		}
 		
 		
 		//clean up dead balls
