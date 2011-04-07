@@ -1,0 +1,7 @@
+# .gitignore for ballpit
+
+# junk files
+*~
+*#
+*.swp
+*.DS_Store
