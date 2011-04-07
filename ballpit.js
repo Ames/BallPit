@@ -124,8 +124,10 @@ function init(){
 	if(!ie) notDiv.addEventListener("touchstart", clickNotify, false);
 
 	
-	setInterval('step()',50); //20fps
-//	setInterval('step()',40); //25fps
+//	setInterval('step()',50); //20fps
+	setInterval('step()',40); //25fps
+//	setInterval('step()',30); //33fps
+//	setInterval('step()',20); //50fps
 
 	setInterval('keepAlive()',5000); //2 seconds
 	//setInterval('notifyDisplay()',1000);
@@ -472,16 +474,11 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		this.div.style.left=Math.round(this.x-this.r)+'px';
 	}
 	
-	//this rarely needs to happen
-	this.upR=function(){
-		this.div.style.width=this.r*2+'px';
-		this.div.style.height=this.r*2+'px';
-	}
-	
 	this.setR=function(newR){
 		this.r=newR;
 		this.m=Math.PI*this.r*this.r*this.density;
-		this.upR();
+		this.div.style.width=Math.round(this.r*2)+'px';
+		this.div.style.height=Math.round(this.r*2)+'px';
 	}
 	
 	this.remove=function(){
@@ -495,7 +492,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	balls.push(this);
 	
 	this.upLoc();
-	this.upR();
+	this.setR(this.r);
 	
 	//this happens a lot too
 	this.doCollide=function(p){
@@ -509,10 +506,15 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		var dx = p2.x-p1.x; //dist
 		var dy = p2.y-p1.y;
 		
-		var dm=Math.dist(dx,dy); //dist mag
- 
-		if(dm<(p1.r+p2.r)){
 		
+		//faster?
+		if((dx*dx+dy*dy)<((p1.r+p2.r)*(p1.r+p2.r))){
+		
+			var dm=Math.dist(dx,dy); //dist mag
+
+			//if(dm<(p1.r+p2.r)){
+
+
 			if(p1.infected && !p2.infected)p2.infect();
 			if(p2.infected && !p1.infected)p1.infect();
 		
@@ -612,7 +614,7 @@ function spawnBalls(){
 function spawnBurst(){
 	var nParts=100;
 	
-	for(var i=1;i<nParts;i++){
+	for(var i=0;i<nParts;i++){
 		var r=Math.random()*dims.w/10;
 		var t=Math.random()*Math.PI*2;
 		
