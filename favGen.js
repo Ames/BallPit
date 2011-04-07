@@ -7,18 +7,18 @@ var setFavCol=function(col,notify){
 	if (canvas.getContext) {
 		canvas.height = canvas.width = 16; // set the size
 		ctx = canvas.getContext('2d');
-		if(notify){
-			ctx.fillStyle = "black";
-			ctx.beginPath();
-			ctx.arc(8,8,8,0,2*Math.PI);
-			ctx.closePath();
-		}
 		ctx.fillStyle = col;
 		ctx.beginPath();
-		ctx.arc(8,8,6.5,0,2*Math.PI);
+		ctx.arc(8,8,8,0,2*Math.PI);
 		ctx.closePath();
 		ctx.fill();
-		
+		if(notify){
+			ctx.fillStyle = "white";
+			ctx.beginPath();
+			ctx.arc(8,8,6.5,0,2*Math.PI);
+			ctx.closePath();
+			ctx.fill();
+		}
 		
 		var head=document.getElementsByTagName('head')[0];
 		//var head=document.getElementsByTagName('body')[0];
