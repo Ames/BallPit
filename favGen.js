@@ -8,10 +8,11 @@ var setFavCol=function(col,notify){
 		canvas.height = canvas.width = 16; // set the size
 		ctx = canvas.getContext('2d');
 		if(notify){
-			ctx.fillStyle = "black";
+			ctx.fillStyle = "blue";
 			ctx.beginPath();
 			ctx.arc(8,8,8,0,2*Math.PI);
 			ctx.closePath();
+			ctx.fill();
 		}
 		ctx.fillStyle = col;
 		ctx.beginPath();
