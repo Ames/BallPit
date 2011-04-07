@@ -8,17 +8,28 @@ var setFavCol=function(col,notify){
 		canvas.height = canvas.width = 16; // set the size
 		ctx = canvas.getContext('2d');
 		ctx.fillStyle = col;
-		ctx.beginPath();
-		ctx.arc(8,8,8,0,2*Math.PI);
-		ctx.closePath();
-		ctx.fill();
+        ctx.beginPath();
 		if(notify){
-			ctx.fillStyle = "white";
-			ctx.beginPath();
-			ctx.arc(8,8,6.5,0,2*Math.PI);
-			ctx.closePath();
-			ctx.fill();
-		}
+            ctx.fillStyle = "black";
+            ctx.arc(8,8,7,0,2*Math.PI);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = col;
+            //ctx.moveTo(8,8);
+            var n = notify;
+            var radS = 3.5;
+            var radL = 8;
+            for(var i=0;i<2*n;i++){
+                var r = i%2?radS:radL;
+                var a = Math.PI/n*i; 
+                ctx.lineTo(8+r*Math.sin(a),8-r*Math.cos(a));
+            }
+        }else{
+        	ctx.arc(8,8,7,0,2*Math.PI);
+        }
+        ctx.closePath()
+        ctx.fill()
 		
 		var head=document.getElementsByTagName('head')[0];
 		//var head=document.getElementsByTagName('body')[0];
