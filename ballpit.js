@@ -60,7 +60,8 @@ var bgColor='';
 
 var run=true;
 
-var notify = false;
+var notify = 0;
+
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
 
@@ -137,7 +138,7 @@ function init(){
 }
 
 function clickNotify(){
-	notify=false;
+	notify=0;
 	notifyDisplay();
 	
 	showMsg=false;
@@ -145,12 +146,11 @@ function clickNotify(){
 }
 
 function notifyDisplay(){
+    setFavCol(ballColor,notify);
 	if(!notify){
-		setFavCol(ballColor);
 		notDiv.style.visibility = "hidden";
 	}
 	else{
-		setFavCol("yellow",true);
 		notDiv.style.visibility="visible";
 	}
 }
@@ -187,8 +187,8 @@ function handleMessage(msg){
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
-		if(/*col!=ballColor && */!showMsg && !notify){
-			notify=true;
+		if(/*col!=ballColor && */!showMsg){
+			notify+=1;
 			notifyDisplay();
 		}
 		
@@ -215,6 +215,7 @@ function handleMessage(msg){
 		if(data.hue){
 			ballColor='hsl('+data.hue+', 70%, 60%)';
 			bgColor='hsl('+data.hue+', 100%, 95%)';
+			notDiv.style.backgroundColor =ballColor;
 			container.style.backgroundColor=bgColor;
 			
 			setFavCol(ballColor);
@@ -644,7 +645,7 @@ function toggleMsg(){
 	if(showMsg){
 		document.getElementById('msgBox').style.visibility='visible';
 		textInput.focus();
-		notify = false;
+		notify = 0;
 		notifyDisplay();
 	}else{
 		document.getElementById('msgBox').style.visibility='hidden';
