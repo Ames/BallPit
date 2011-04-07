@@ -54,14 +54,17 @@ body{
 
 	min-width:150px;
 	max-width:500px;
+	padding-bottom:1px;
 	
 }
 #messages{
 	max-height: 200px;
 	overflow-y: auto;
+	margin-left:2px;
+	margin-right:5px;
 }
 form{
-	margin-bottom: 8px;
+	margin-bottom: 2px;
 	padding: 3px 3px;
 }
 input{
