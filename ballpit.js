@@ -81,7 +81,8 @@ function init(){
 	
 	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
 	//var transports=["websocket","flashsocket"];
-	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	var transports=["websocket", "htmlfile", "xhr-multipart", "jsonp-polling"];
 	
 	//if(WebSocket)var transports=["websocket"];
 	

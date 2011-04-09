@@ -62,9 +62,10 @@ body{
 	overflow-y: auto;
 	margin-left:2px;
 	margin-right:5px;
+	margin-bottom: 2px;
 }
 form{
-	margin-bottom: 2px;
+	margin-bottom: 0px;
 	padding: 3px 3px;
 }
 input{
