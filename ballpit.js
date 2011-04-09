@@ -78,7 +78,9 @@ function init(){
 	notDiv=document.getElementById('msgNote');
 	
 	container=(document.getElementById('container'));
-	
+	if(window.webkitNotifications){
+	    container.onclick=requestPop;
+	}
 	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
 	//var transports=["websocket","flashsocket"];
 	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
@@ -191,6 +193,7 @@ function handleMessage(msg){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
 		if(/*col!=ballColor && */!showMsg){
+		    notifyPop(data,col)
 			notify+=1;
 			notifyDisplay();
 		}
@@ -880,4 +883,17 @@ function freeze(){
 
 Math.dist=function(a,b){
 	return Math.sqrt(a*a+b*b);
+}
+
+function notifyPop(msg,col){
+    var title = msg.address;
+    var text = msg.message;
+    //alert(genCol(col));
+    window.webkitNotifications.createNotification(genCol(col),title,text).show();
+}
+
+function requestPop(){
+    if(window.webkitNotifications.checkPermission()==1){
+        window.webkitNotifications.requestPermission();
+    }
 }
