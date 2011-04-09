@@ -888,8 +888,11 @@ Math.dist=function(a,b){
 function notifyPop(msg,col){
     var title = msg.address;
     var text = msg.message;
-    //alert(genCol(col));
-    window.webkitNotifications.createNotification(genCol(col),title,text).show();
+    var popup = window.webkitNotifications.createNotification(genCol(col),title,text);
+    popup.show();
+    setTimeout(function(){
+    popup.cancel();
+    }, '7000');
 }
 
 function requestPop(){
