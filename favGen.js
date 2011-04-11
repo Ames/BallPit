@@ -1,5 +1,16 @@
 var favLink;
 
+var genCol = function(col){
+    var canvas = document.createElement('canvas'),ctx;
+    if(canvas.getContext){
+        canvas.height = canvas.width = 32;
+        ctx = canvas.getContext('2d');
+        ctx.fillStyle = col;
+        roundRect(ctx, 0, 0, 29, 29, 10, true, true);
+        return canvas.toDataURL('image/png');
+    }
+}
+
 var setFavCol=function(col,notify){
 	
 	var canvas = document.createElement('canvas'), ctx;
@@ -50,4 +61,30 @@ var removeFav=function(){
 	
 	head.removeChild(favLink);
 	favLink=undefined;
+}
+
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == "undefined" ) {
+    stroke = true;
+  }
+  if (typeof radius === "undefined") {
+    radius = 5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (stroke) {
+    ctx.stroke();
+  }
+  if (fill) {
+    ctx.fill();
+  }        
 }
