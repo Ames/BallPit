@@ -847,6 +847,8 @@ var E;
 function keyDown(e){
 	if (!e) var e = window.event;
 
+	var dG=.025;
+
 	//E=e;
 	
 	if(e.target.id != 'textInput' || e.which==27){
@@ -874,19 +876,19 @@ function keyDown(e){
 				clear();
 				break;
 			case 38: //up
-				gravityY-=.1;
+				gravityY-=dG;
 				break;
 
 			case 40: //down
-				gravityY+=.1;
+				gravityY+=dG;
 				break;
 				
 			case 39: //right
-				gravityX+=.1;
+				gravityX+=dG;
 				break;
 				
 			case 37: //left
-				gravityX-=.1;
+				gravityX-=dG;
 				break;
 			 case 70: //f
 				freeze();
