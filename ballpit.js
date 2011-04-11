@@ -80,41 +80,15 @@ function init(){
 	notDiv=document.getElementById('msgNote');
 	
 	container=(document.getElementById('container'));
-	if(window.webkitNotifications){
-	    container.onclick=requestPop;
-	}
-	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
-	//var transports=["websocket","flashsocket"];
-	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
-	var transports=["websocket", "htmlfile", "xhr-multipart", "jsonp-polling"];
-	
-	//if(WebSocket)var transports=["websocket"];
-	
-	//force opera to use flashsocket
-//	if(io.util.opera) transports=["flashsocket"];
-	
-	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
-	     'rememberTransport':false});
+
+
+	initSocket();
 
 
 	for(var i=0;i<4;i++){
 		edgeTabs[i]=new EdgeTab(i);	
 	}
-	
-	//socket.options.;
-	
-	socket.on('connect',handleConnect);
-	socket.on('message',handleMessage);
-	socket.on('disconnect',handleDisconnect);
-	
-	socket.sendJSON=function(data){
-		if(socket.connected){
-			this.send(JSON.stringify(data));
-		}
-	}
-	
-	socket.connect();
-
+		
 	window.onresize=resize;
 	document.onmousedown=mouseDown;
 	document.onmouseup=mouseUp;
@@ -135,13 +109,45 @@ function init(){
 //	setInterval('step()',30); //33fps
 //	setInterval('step()',20); //50fps
 
-	setInterval('keepAlive()',5000); //2 seconds
+	setInterval('keepAlive()',5000); //5 seconds
 	//setInterval('notifyDisplay()',1000);
 	
 	//new Ball(100,200,6,4);
 	
 	resize();
+}
 
+function initSocket(){
+	
+	if(socket){
+		socket.disconnect();
+		socket=null;
+	}
+	
+	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
+	//var transports=["websocket","flashsocket"];
+	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	
+	//if(WebSocket)var transports=["websocket"];
+	
+	//force opera to use flashsocket
+//	if(io.util.opera) transports=["flashsocket"];
+	
+	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
+	     'rememberTransport':false});
+
+	socket.on('connect',handleConnect);
+	socket.on('message',handleMessage);
+	socket.on('disconnect',handleDisconnect);
+	
+	socket.sendJSON=function(data){
+		if(socket.connected){
+			this.send(JSON.stringify(data));
+		}
+	}
+	
+	socket.connect();
 }
 
 function clickNotify(){
@@ -164,7 +170,8 @@ function notifyDisplay(){
 
 function keepAlive(){
 	if(!socket.connected){
-		socket.connect();	
+		initSocket();
+		//socket.connect();	
 	}
 }
 
@@ -176,7 +183,10 @@ if(ie){
 }
 
 function handleConnect(){
-	socket.sendJSON({'declare':'space'});	
+	headDiv.innerHTML="";
+	links=[0,0,0,0];
+	upTabs();
+	socket.sendJSON({'declare':'space'});
 	resize();
 }
 
@@ -188,6 +198,8 @@ function handleDisconnect(){
 
 function handleMessage(msg){
 	
+	//console.log(msg);
+
 	var data=JSON.parse(msg);
 	
 
@@ -195,7 +207,6 @@ function handleMessage(msg){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
 		if(/*col!=ballColor && */!showMsg){
-		    notifyPop(data,col)
 			notify+=1;
 			notifyDisplay();
 		}
@@ -248,7 +259,10 @@ function handleMessage(msg){
 	}
 	
 	if(data.ball){
+		
+		//var b=JSON.parse(data.ball);
 		var b=data.ball;
+		
 		var x,y,vx,vy;
 		switch(data.edge){
 			case 0: x=(1-b.loc)*dims.w; y=0; vx=-b.vel[1]; vy= b.vel[0]; break;	
@@ -258,6 +272,11 @@ function handleMessage(msg){
 		}
 		new Ball(x,y,vx,vy,data.ball.r,data.ball.color,data.ball.type);
 	}
+	
+	if(data.pending!=undefined){
+		edgeTabs[data.pending].setState(2);
+	}
+
 }
 
 function resize(){
@@ -463,13 +482,24 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		
 		parcel={};
 		parcel.edge=edge;
-		parcel.ball={
+//		parcel.ball={
+//			'loc':loc,
+//			'vel':vel,
+//			'r':this.r,
+//			'color':this.color,
+//			'type':this.type //more to come...
+//		};
+		
+		var ballObj={
 			'loc':loc,
 			'vel':vel,
 			'r':this.r,
 			'color':this.color,
 			'type':this.type //more to come...
 		};
+		
+		//parcel.ball=JSON.stringify(ballObj);
+		parcel.ball=ballObj;
 		
 		socket.sendJSON(parcel);
 		
@@ -478,11 +508,11 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	//this happens a lot  -  it's really slow.
 	this.upLoc=function(){
-		this.div.style.top=this.y-this.r+'px';
-		this.div.style.left=this.x-this.r+'px';
+//		this.div.style.top=this.y-this.r+'px';
+//		this.div.style.left=this.x-this.r+'px';
 
-//		this.div.style.top=Math.round(this.y-this.r)+'px';
-//		this.div.style.left=Math.round(this.x-this.r)+'px';
+		this.div.style.top=Math.round(this.y-this.r)+'px';
+		this.div.style.left=Math.round(this.x-this.r)+'px';
 	}
 	
 	this.setR=function(newR){
@@ -772,9 +802,9 @@ function EdgeTab(edge){
 		
 		socket.sendJSON({'linking':this.edge});	
 
-		if(this.state==0){
-			this.setState(2);
-		}
+//		if(this.state==0){
+//			this.setState(2);
+//		}
 
 	//	balls[balls.length-1].remove();
 //		
@@ -892,20 +922,4 @@ function freeze(){
 
 Math.dist=function(a,b){
 	return Math.sqrt(a*a+b*b);
-}
-
-function notifyPop(msg,col){
-    var title = msg.address;
-    var text = msg.message;
-    var popup = window.webkitNotifications.createNotification(genCol(col),title,text);
-    popup.show();
-    setTimeout(function(){
-    popup.cancel();
-    }, '7000');
-}
-
-function requestPop(){
-    if(window.webkitNotifications.checkPermission()==1){
-        window.webkitNotifications.requestPermission();
-    }
 }
