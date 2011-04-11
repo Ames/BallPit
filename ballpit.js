@@ -62,6 +62,8 @@ var run=true;
 
 var notify = 0;
 
+var useAccel=true;
+
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
 
@@ -307,8 +309,10 @@ function mouseUp(e){
 }
 
 window.ondeviceorientation=function(e){
-	gravityY=e.beta/90;
-	gravityX=e.gamma/90;	
+	if(useAccel){
+		gravityY=e.beta/90;
+		gravityX=e.gamma/90;
+	}
 }
 
 var avgShake=0;
@@ -346,8 +350,10 @@ if(!ie){
 			accY = event.accelerationIncludingGravity.y;
 			accZ = event.accelerationIncludingGravity.z;
 			
+		if(useAccel){
 			gravityX=accX/10;
 			gravityY=-accY/10;
+		}
 			
 		//}
 		if(!accX){
@@ -469,11 +475,11 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	//this happens a lot  -  it's really slow.
 	this.upLoc=function(){
-//		this.div.style.top=this.y-this.r+'px';
-//		this.div.style.left=this.x-this.r+'px';
+		this.div.style.top=this.y-this.r+'px';
+		this.div.style.left=this.x-this.r+'px';
 
-		this.div.style.top=Math.round(this.y-this.r)+'px';
-		this.div.style.left=Math.round(this.x-this.r)+'px';
+//		this.div.style.top=Math.round(this.y-this.r)+'px';
+//		this.div.style.left=Math.round(this.x-this.r)+'px';
 	}
 	
 	this.setR=function(newR){
@@ -851,6 +857,9 @@ function keyDown(e){
 				break;
 			 case 70: //f
 				freeze();
+				break;
+			case 65: //a
+				useAccel=!useAccel;
 				break;
 			 case 71: //g
 				gravityX=0;
