@@ -510,7 +510,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	
 	this.fG = function(p2){
 	    f = this.m*p2.m*gConst;
-	    r = Math.pow((this.x-p2.x),2)+Math.pow((this.y-p2.y),2);
+	    r = Math.pow((this.x-p2.x),2)+Math.pow((this.y-p2.y),2)||1;
 	    f = f/r; 
 	    ang = Math.atan2(p2.y-this.y,p2.x-this.x);
 	    this.vy += f*Math.sin(ang)/this.m;
