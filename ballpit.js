@@ -43,6 +43,7 @@ var gravityX=0;
 var gravityY=.5;
 
 var friction=.005;
+var frictionT = 0;
 
 var defRad=15;
 
@@ -61,6 +62,9 @@ var bgColor='';
 var run=true;
 
 var notify = 0;
+
+var Universal = 0;
+var gConst = 100;
 
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
@@ -378,7 +382,7 @@ if(!ie){
 	}, true);
 }
 
-function Ball(xi,yi,vxi,vyi,ri,color,type){
+function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	
 	this.x=xi;
 	this.y=yi;
@@ -393,7 +397,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 	
 	this.r=ri || defRad;
 	
-	this.density=.001;
+	this.density=.001||density;
 	
 	this.m=Math.PI*this.r*this.r*this.density;
 	
@@ -411,6 +415,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		//plague
 		if(this.infected){
 			this.setR(this.r-.5);
+			this.m = Math.PI*this.r*this.density;
 			if(this.r<4)this.remove();
 		}
 		
@@ -421,8 +426,18 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		this.vx*=1-friction;
 		this.vy*=1-friction;
 		
+		if(Universal){
+		    for(var i = 0;i<balls.length;i++){
+		        if(balls[i]!=this){
+		            this.fG(balls[i]);
+		        }
+		    }
+		}
+		
 		this.x+=this.vx;
 		this.y+=this.vy;
+		
+		
 		
 		
 		//walls
@@ -441,6 +456,15 @@ function Ball(xi,yi,vxi,vyi,ri,color,type){
 		if(links[3]){ if(this.x>dims.w)this.send(3);
 		}else{ if(this.x>dims.w-this.r){this.vx*=-1;this.x=dims.w-this.r;};}
 		
+	}
+	
+	this.fG = function(p2){
+	    f = this.m*p2.m*gConst;
+	    r = Math.pow((this.x-p2.x),2)+Math.pow((this.y-p2.y),2);
+	    f = f/r; 
+	    ang = Math.atan2(p2.y-this.y,p2.x-this.x);
+	    this.vy += f*Math.sin(ang)/this.m;
+	    this.vx += f*Math.cos(ang)/this.m;
 	}
 	
 	this.send=function(edge){
@@ -837,6 +861,17 @@ function keyDown(e){
 			case 88: //x
 				clear();
 				break;
+			case 85://u
+			    if(Universal){
+			        Universal = 0;
+			    }else{
+			        Universal = 1;
+			    }
+			    t = frictionT;
+			    frictionT = friction;
+			    friction = t;
+			    break;
+				
 			case 38: //up
 				gravityY-=.1;
 				break;
@@ -892,7 +927,7 @@ function notifyPop(msg,col){
     popup.show();
     setTimeout(function(){
     popup.cancel();
-    }, '7000');
+    }, '7`000');
 }
 
 function requestPop(){
