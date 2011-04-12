@@ -987,12 +987,12 @@ Math.dist=function(a,b){
 function notifyPop(msg,col){
 	if(webkitNotifications){
 	    var title = msg.address;
-	    var text = msg.message;
+	    var text = unescape(msg.message);
 	    var popup = window.webkitNotifications.createNotification(genCol(col),title,text);
 	    popup.show();
 	    setTimeout(function(){
 	    popup.cancel();
-	    }, '7`000');
+	    }, '7000');
 	}
 }
 
