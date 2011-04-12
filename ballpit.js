@@ -26,6 +26,7 @@ var headDiv;
 var socket;
 var textInput;
 var msgDiv;
+var chatterDiv;
 var notDiv;
 
 var id=0;
@@ -77,11 +78,16 @@ function init(){
 	textInput=document.getElementById('textInput');
 	headDiv=document.getElementById('header');
 	msgDiv=document.getElementById('messages');
+	chatterDiv=document.getElementById('chatterBox');
 	notDiv=document.getElementById('msgNote');
 	
 	container=(document.getElementById('container'));
 
-
+	if(window.webkitNotifications){
+	    container.onclick=requestPop;   //?!
+	}
+	
+	
 	initSocket();
 
 
@@ -150,6 +156,21 @@ function initSocket(){
 	socket.connect();
 }
 
+function showChatters(chatters){
+	
+	var newHTML='';
+	
+	for(i in chatters){
+		var col='hsl('+chatters[i][1]+', 70%, 60%)';
+
+		newHTML+='<div title="'+chatters[i][0]+'" style="background-color:'+col+'"></div>';
+	}
+	
+	console.log(newHTML);
+
+	chatterDiv.innerHTML=newHTML;
+}
+
 function clickNotify(){
 	notify=0;
 	notifyDisplay();
@@ -201,12 +222,12 @@ function handleMessage(msg){
 	//console.log(msg);
 
 	var data=JSON.parse(msg);
-	
 
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
 		if(/*col!=ballColor && */!showMsg){
+			notifyPop(data,col)
 			notify+=1;
 			notifyDisplay();
 		}
@@ -276,7 +297,10 @@ function handleMessage(msg){
 	if(data.pending!=undefined){
 		edgeTabs[data.pending].setState(2);
 	}
-
+	
+	if(data.chatters){
+		showChatters(data.chatters);
+	}
 }
 
 function resize(){
@@ -925,3 +949,20 @@ function freeze(){
 Math.dist=function(a,b){
 	return Math.sqrt(a*a+b*b);
 }
+
+function notifyPop(msg,col){
+    var title = msg.address;
+    var text = msg.message;
+    var popup = window.webkitNotifications.createNotification(genCol(col),title,text);
+    popup.show();
+    setTimeout(function(){
+    popup.cancel();
+    }, '7000');
+}
+
+function requestPop(){
+    if(window.webkitNotifications.checkPermission()==1){
+        window.webkitNotifications.requestPermission();
+    }
+}
+

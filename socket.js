@@ -145,13 +145,33 @@ function tellMasters(){
 }
 
 
+function reportChatters(){
+	//right now, we're only interested in which hosts are connected...
+	
+	var hosts={};
+	
+	var chatters=[];
+	
+	for(var i in spaces){
+		if(spaces[i]){
+			if(!(hosts[spaces[i].address])){
+				hosts[spaces[i].address]=1;
+				chatters.push([spaces[i].address,spaces[i].hue]);
+			}
+		}
+	}
+	
+	broadcast({'chatters':chatters});
+}
+
 function Space(client_){
 	var client=client_;
 	
 	client.parent=this;
 	
 	var address=client.connection.remoteAddress;	
-
+	
+	this.address=address;
 	
 	var arry=address.split('.');
 	var product=arry[0]*arry[1]*arry[2]*arry[3]+'';
@@ -268,6 +288,7 @@ function Space(client_){
 		}
 		
 		tellMasters();
+		reportChatters();
 	}
 	
 	this.info=function(){
@@ -286,6 +307,8 @@ function Space(client_){
 
 	client.sendJSON({'id':id,'address':address,'hue':this.hue});
 	
+	reportChatters();
+
 	this.sendLinks=function(){
 		
 		var hues=[];
