@@ -171,8 +171,6 @@ function showChatters(chatters){
 		newHTML+='<div title="'+chatters[i][0]+'" style="background-color:'+col+'"></div>';
 	}
 	
-	console.log(newHTML);
-
 	chatterDiv.innerHTML=newHTML;
 }
 
