@@ -26,6 +26,7 @@ var headDiv;
 var socket;
 var textInput;
 var msgDiv;
+var chatterDiv;
 var notDiv;
 
 var id=0;
@@ -63,8 +64,11 @@ var run=true;
 
 var notify = 0;
 
+
 var Universal = 0;
 var gConst = 100;
+
+var useAccel=true;
 
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
@@ -79,44 +83,23 @@ function init(){
 	textInput=document.getElementById('textInput');
 	headDiv=document.getElementById('header');
 	msgDiv=document.getElementById('messages');
+	chatterDiv=document.getElementById('chatterBox');
 	notDiv=document.getElementById('msgNote');
 	
 	container=(document.getElementById('container'));
+
 	if(window.webkitNotifications){
-	    container.onclick=requestPop;
+	    container.onclick=requestPop;   //?!
 	}
-	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
-	//var transports=["websocket","flashsocket"];
-	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
-	var transports=["websocket", "htmlfile", "xhr-multipart", "jsonp-polling"];
 	
-	//if(WebSocket)var transports=["websocket"];
 	
-	//force opera to use flashsocket
-//	if(io.util.opera) transports=["flashsocket"];
-	
-	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
-	     'rememberTransport':false});
+	initSocket();
 
 
 	for(var i=0;i<4;i++){
 		edgeTabs[i]=new EdgeTab(i);	
 	}
-	
-	//socket.options.;
-	
-	socket.on('connect',handleConnect);
-	socket.on('message',handleMessage);
-	socket.on('disconnect',handleDisconnect);
-	
-	socket.sendJSON=function(data){
-		if(socket.connected){
-			this.send(JSON.stringify(data));
-		}
-	}
-	
-	socket.connect();
-
+		
 	window.onresize=resize;
 	document.onmousedown=mouseDown;
 	document.onmouseup=mouseUp;
@@ -137,13 +120,60 @@ function init(){
 //	setInterval('step()',30); //33fps
 //	setInterval('step()',20); //50fps
 
-	setInterval('keepAlive()',5000); //2 seconds
+	setInterval('keepAlive()',5000); //5 seconds
 	//setInterval('notifyDisplay()',1000);
 	
 	//new Ball(100,200,6,4);
 	
 	resize();
+}
 
+function initSocket(){
+	
+	if(socket){
+		socket.disconnect();
+		socket=null;
+	}
+	
+	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
+	//var transports=["websocket","flashsocket"];
+	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	
+	//if(WebSocket)var transports=["websocket"];
+	
+	//force opera to use flashsocket
+//	if(io.util.opera) transports=["flashsocket"];
+	
+	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
+	     'rememberTransport':false});
+
+	socket.on('connect',handleConnect);
+	socket.on('message',handleMessage);
+	socket.on('disconnect',handleDisconnect);
+	
+	socket.sendJSON=function(data){
+		if(socket.connected){
+			this.send(JSON.stringify(data));
+		}
+	}
+	
+	socket.connect();
+}
+
+function showChatters(chatters){
+	
+	var newHTML='';
+	
+	for(i in chatters){
+		var col='hsl('+chatters[i][1]+', 70%, 60%)';
+
+		newHTML+='<div title="'+chatters[i][0]+'" style="background-color:'+col+'"></div>';
+	}
+	
+	console.log(newHTML);
+
+	chatterDiv.innerHTML=newHTML;
 }
 
 function clickNotify(){
@@ -166,7 +196,8 @@ function notifyDisplay(){
 
 function keepAlive(){
 	if(!socket.connected){
-		socket.connect();	
+		initSocket();
+		//socket.connect();	
 	}
 }
 
@@ -178,7 +209,10 @@ if(ie){
 }
 
 function handleConnect(){
-	socket.sendJSON({'declare':'space'});	
+	headDiv.innerHTML="";
+	links=[0,0,0,0];
+	upTabs();
+	socket.sendJSON({'declare':'space'});
 	resize();
 }
 
@@ -190,14 +224,15 @@ function handleDisconnect(){
 
 function handleMessage(msg){
 	
+	//console.log(msg);
+
 	var data=JSON.parse(msg);
-	
 
 	if(data.message){
 		//var msgTxt=+';
 		var col='hsl('+data.hue+', 70%, 60%)';
 		if(/*col!=ballColor && */!showMsg){
-		    notifyPop(data,col)
+			notifyPop(data,col)
 			notify+=1;
 			notifyDisplay();
 		}
@@ -250,7 +285,10 @@ function handleMessage(msg){
 	}
 	
 	if(data.ball){
+		
+		//var b=JSON.parse(data.ball);
 		var b=data.ball;
+		
 		var x,y,vx,vy;
 		switch(data.edge){
 			case 0: x=(1-b.loc)*dims.w; y=0; vx=-b.vel[1]; vy= b.vel[0]; break;	
@@ -259,6 +297,14 @@ function handleMessage(msg){
 			case 3: x=dims.w; y=(1-b.loc)*dims.h;vx=-b.vel[0]; vy=-b.vel[1]; break;
 		}
 		new Ball(x,y,vx,vy,data.ball.r,data.ball.color,data.ball.type);
+	}
+	
+	if(data.pending!=undefined){
+		edgeTabs[data.pending].setState(2);
+	}
+	
+	if(data.chatters){
+		showChatters(data.chatters);
 	}
 }
 
@@ -314,8 +360,10 @@ function mouseUp(e){
 }
 
 window.ondeviceorientation=function(e){
-	gravityY=e.beta/90;
-	gravityX=e.gamma/90;	
+	if(useAccel){
+		gravityY=e.beta/90;
+		gravityX=e.gamma/90;
+	}
 }
 
 var avgShake=0;
@@ -353,8 +401,10 @@ if(!ie){
 			accY = event.accelerationIncludingGravity.y;
 			accZ = event.accelerationIncludingGravity.z;
 			
+		if(useAccel){
 			gravityX=accX/10;
 			gravityY=-accY/10;
+		}
 			
 		//}
 		if(!accX){
@@ -481,13 +531,24 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		
 		parcel={};
 		parcel.edge=edge;
-		parcel.ball={
+//		parcel.ball={
+//			'loc':loc,
+//			'vel':vel,
+//			'r':this.r,
+//			'color':this.color,
+//			'type':this.type //more to come...
+//		};
+		
+		var ballObj={
 			'loc':loc,
 			'vel':vel,
 			'r':this.r,
 			'color':this.color,
 			'type':this.type //more to come...
 		};
+		
+		//parcel.ball=JSON.stringify(ballObj);
+		parcel.ball=ballObj;
 		
 		socket.sendJSON(parcel);
 		
@@ -790,9 +851,9 @@ function EdgeTab(edge){
 		
 		socket.sendJSON({'linking':this.edge});	
 
-		if(this.state==0){
-			this.setState(2);
-		}
+//		if(this.state==0){
+//			this.setState(2);
+//		}
 
 	//	balls[balls.length-1].remove();
 //		
@@ -835,6 +896,8 @@ var E;
 function keyDown(e){
 	if (!e) var e = window.event;
 
+	var dG=.025;
+
 	//E=e;
 	
 	if(e.target.id != 'textInput' || e.which==27){
@@ -873,22 +936,25 @@ function keyDown(e){
 			    break;
 				
 			case 38: //up
-				gravityY-=.1;
+				gravityY-=dG;
 				break;
 
 			case 40: //down
-				gravityY+=.1;
+				gravityY+=dG;
 				break;
 				
 			case 39: //right
-				gravityX+=.1;
+				gravityX+=dG;
 				break;
 				
 			case 37: //left
-				gravityX-=.1;
+				gravityX-=dG;
 				break;
 			 case 70: //f
 				freeze();
+				break;
+			case 65: //a
+				useAccel=!useAccel;
 				break;
 			 case 71: //g
 				gravityX=0;
@@ -935,3 +1001,4 @@ function requestPop(){
         window.webkitNotifications.requestPermission();
     }
 }
+

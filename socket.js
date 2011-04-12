@@ -57,7 +57,7 @@ socket.on('connection', function(client){
 	
 });
 
-
+//this is really inefficient...
 function route(parcel,source){
 	var dst=findLink([source,parcel.edge]);
 	
@@ -78,6 +78,21 @@ function findLink(lin){
 	}
 	return 0;
 }
+
+
+function linkId(lin){
+	for(var l in links){
+		//console.log('checking link '+l);
+
+		if((links[l][0][0]==lin[0] && links[l][0][1]==lin[1]) ||
+		   (links[l][1][0]==lin[0] && links[l][1][1]==lin[1])){
+		   	
+		    return l;
+		}
+	}	
+	return -1;
+}
+
 
 function addLink(link){
 	
@@ -130,13 +145,33 @@ function tellMasters(){
 }
 
 
+function reportChatters(){
+	//right now, we're only interested in which hosts are connected...
+	
+	var hosts={};
+	
+	var chatters=[];
+	
+	for(var i in spaces){
+		if(spaces[i]){
+			if(!(hosts[spaces[i].address])){
+				hosts[spaces[i].address]=1;
+				chatters.push([spaces[i].address,spaces[i].hue]);
+			}
+		}
+	}
+	
+	broadcast({'chatters':chatters});
+}
+
 function Space(client_){
 	var client=client_;
 	
 	client.parent=this;
 	
 	var address=client.connection.remoteAddress;	
-
+	
+	this.address=address;
 	
 	var arry=address.split('.');
 	var product=arry[0]*arry[1]*arry[2]*arry[3]+'';
@@ -195,28 +230,29 @@ function Space(client_){
 			
 			//  ignore if second edge is already selected
 			
-			if(pendingLink){				
-				addLink([pendingLink,[id,data.linking]]);
+			var lin=[id,data.linking];
+
+			if(pendingLink){
+				
+				var theLink=linkId(lin); //
+				
+				if(~theLink)removeLink(theLink);
+				
+				addLink([pendingLink,lin]);
 				
 				tellMasters();
 				pendingLink=false;
 			}else{
 
-				var theLink=-1;
-
-			//	for(var l=links.length-1;l>=0;l--){
-				for(var l in links){
-					//console.log('checking link '+l);
-
-					if((links[l][0][0]==id && links[l][0][1]==data.linking) ||
-					   (links[l][1][0]==id && links[l][1][1]==data.linking)){
-					   	
-					    theLink=l;
-					}
-				}
+				//check if the tab is linked
+				var theLink=linkId(lin);
 				
 				if(theLink==-1){
-					pendingLink=[id,data.linking];
+					pendingLink=lin;
+					
+					//tell client
+					client.sendJSON({'pending':data.linking});
+					
 				}else{
 					removeLink(theLink);
 				}
@@ -252,6 +288,7 @@ function Space(client_){
 		}
 		
 		tellMasters();
+		reportChatters();
 	}
 	
 	this.info=function(){
@@ -270,6 +307,8 @@ function Space(client_){
 
 	client.sendJSON({'id':id,'address':address,'hue':this.hue});
 	
+	reportChatters();
+
 	this.sendLinks=function(){
 		
 		var hues=[];
@@ -282,6 +321,8 @@ function Space(client_){
 		client.sendJSON({'links':this.links,'hues':hues});
 	}
 }
+
+
 
 function Master(client_){
 	var client=client_;
