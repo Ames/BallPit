@@ -11,11 +11,11 @@ any student at Swarthmore College.
 
 
 TODO:
--Server:
---Log stuff:
----spaces and masters connecting and disconnecting.
----chat
----links (?)
----balls(?!) - perhaps a tally (per host?)
---make routing more efficient
---if not routing, make SOMETHING more efficient...
+- Server:
+-- Log stuff:
+--- spaces and masters connecting and disconnecting.
+--- chat
+--- links (?)
+--- balls(?!) - perhaps a tally (per host?)
+-- make routing more efficient
+-- if not routing, make SOMETHING more efficient...
