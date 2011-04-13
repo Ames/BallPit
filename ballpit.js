@@ -474,14 +474,14 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		this.vx*=1-friction;
 		this.vy*=1-friction;
 		
-		if(Universal){
-		    for(var i = 0;i<balls.length;i++){
-		        if(balls[i]!=this){
-		            this.fG(balls[i]);
-		        }
-		    }
-		}
-		
+//		if(Universal){
+//		    for(var i = 0;i<balls.length;i++){
+//		        if(balls[i]!=this){
+//		            this.fG(balls[i]);
+//		        }
+//		    }
+//		}
+//		
 		this.x+=this.vx;
 		this.y+=this.vy;
 		
@@ -665,8 +665,14 @@ function step(){
 	
 	if(run){
 	
+		if(Universal)
+			for(var i in balls)
+				for(var j in balls)
+					if(i!=j)
+						balls[i].fG(balls[j]);
+						
+	
 		for(var i in balls)balls[i].step();
-
 
 		//for each particle
 		for(var i1 in balls){
@@ -854,7 +860,7 @@ function EdgeTab(edge){
 	
 		this.setPos(styles[this.state][2]);
 		
-		if(this.state==1){
+		if(this.state!=0){
 			this.shadow.style.setProperty('-webkit-box-shadow',styles[this.state][1]+' 0px 0px 15px 4px',null);		
 			this.shadow.style.setProperty(   '-moz-box-shadow',styles[this.state][1]+' 0px 0px 15px 4px',null);		
 		}else{
