@@ -6,7 +6,14 @@ var genCol = function(col){
         canvas.height = canvas.width = 32;
         ctx = canvas.getContext('2d');
         ctx.fillStyle = col;
-        roundRect(ctx, 0, 0, 29, 29, 10, true, true);
+        //roundRect(ctx, 0, 0, 29, 29, 10, true, true);
+        
+        //the rounded-rect was a little funny looking, but circles are boring...
+        ctx.beginPath();
+        ctx.arc(16,16,16,0,2*Math.PI);
+        ctx.closePath()
+        ctx.fill()
+
         return canvas.toDataURL('image/png');
     }
 }

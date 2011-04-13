@@ -214,6 +214,7 @@ function Space(client_){
 		if(data.message){
 			data.hue=this.hue;
 			data.address=address;
+			data.message=data.message;
 			broadcast(data);
 			//console.log('message: '+data);
 		}

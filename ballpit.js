@@ -554,12 +554,24 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	}
 	
 	//this happens a lot  -  it's really slow.
+	
+	var useTransform=false;
+	
+	if(useTransform){
+		this.div.style.top='0px';
+		this.div.style.left='0px';
+	}
+	
 	this.upLoc=function(){
 //		this.div.style.top=this.y-this.r+'px';
 //		this.div.style.left=this.x-this.r+'px';
-
-		this.div.style.top=Math.round(this.y-this.r)+'px';
-		this.div.style.left=Math.round(this.x-this.r)+'px';
+		
+		if(useTransform){
+			this.div.style.setProperty('-webkit-transform','translate('+Math.round(this.x-this.r)+'px, '+Math.round(this.y-this.r)+'px)');
+		}else{
+			this.div.style.top=Math.round(this.y-this.r)+'px';
+			this.div.style.left=Math.round(this.x-this.r)+'px';
+		}
 	}
 	
 	this.setR=function(newR){
@@ -775,6 +787,7 @@ function EdgeTab(edge){
 	var l=horiz?far?100:0:50;
 	var t=horiz?50:(far?100:0);
 	
+	//div is the actual tab
 	this.div=document.createElement('div');
 	this.div.className='edgeTab';
 	container.appendChild(this.div);
@@ -794,8 +807,17 @@ function EdgeTab(edge){
 		this.div.style.marginLeft=(horiz?m2:m1)+'px';
 	}
 	
+	//div2 is for the shadow
+	this.shadow=document.createElement('div');
+	this.shadow.className='edgeShadow';
+	container.appendChild(this.shadow);
+		
+	this.shadow.style.width=horiz?'0px':'100%';
+	this.shadow.style.height=horiz?'100%':'0px';
+	this.shadow.style.top=(horiz?0:(far?100:0))+'%';
+	this.shadow.style.left=(horiz?(far?100:0):0)+'%';
 	
-	this.state;
+	
 	
 	//backgound, border, pos
 	var styles=[
@@ -815,7 +837,7 @@ function EdgeTab(edge){
 		//bgColor='hsl('+hue+', 100%, 95%)';
 
 		styles[1][0]='hsl('+hue+', 100%, 80%)';	
-		styles[1][1]='hsl('+hue+', 70%, 50%)';	
+		styles[1][1]='hsl('+hue+', 70%, 50%)';
 	}
 
 	//state: 
@@ -831,7 +853,14 @@ function EdgeTab(edge){
 		}
 	
 		this.setPos(styles[this.state][2]);
-
+		
+		if(this.state==1){
+			this.shadow.style.setProperty('-webkit-box-shadow',styles[this.state][1]+' 0px 0px 15px 4px',null);		
+			this.shadow.style.setProperty(   '-moz-box-shadow',styles[this.state][1]+' 0px 0px 15px 4px',null);		
+		}else{
+			this.shadow.style.setProperty('-webkit-box-shadow','none',null);		
+			this.shadow.style.setProperty(   '-moz-box-shadow','none',null);		
+		}
 	}
 	
 	this.hide=function(){
@@ -968,6 +997,12 @@ function keyDown(e){
 				}
 
 				break;
+				
+			case 52: //4
+			case 48: edgeTabs[0].click(); break; //0
+			case 49: edgeTabs[1].click(); break; //1
+			case 50: edgeTabs[2].click(); break; //2
+			case 51: edgeTabs[3].click(); break; //3
 		}
 	}
 
@@ -1001,4 +1036,3 @@ function requestPop(){
         window.webkitNotifications.requestPermission();
     }
 }
-
