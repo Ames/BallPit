@@ -28,6 +28,7 @@ var textInput;
 var msgDiv;
 var chatterDiv;
 var notDiv;
+var ui;
 
 var id=0;
 
@@ -54,6 +55,8 @@ var edgeTabs=[];
 
 var showTabs=true;
 
+var showUI=false;
+
 var address='';
 var hue=0;
 
@@ -70,6 +73,7 @@ var gConst = 100;
 
 var useAccel=true;
 
+var hasOrientation=('ondeviceorientation' in window);
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
 
@@ -87,6 +91,8 @@ function init(){
 	notDiv=document.getElementById('msgNote');
 	
 	container=(document.getElementById('container'));
+	ui=(document.getElementById('ui'));
+
 
 	if(window.webkitNotifications){
 	    container.onclick=requestPop;   //?!
@@ -126,6 +132,22 @@ function init(){
 	//new Ball(100,200,6,4);
 	
 	resize();
+	
+	uiFrict=new UI('friction ',[0,.5],function(v){friction=v;});
+	uiFrict.set(friction);
+	
+	uiGrav=new UI('gravitation ',[0,1000],function(v){gConst=v;});
+	uiGrav.set(gConst);
+	
+	new UI('freeze ',1,function(){freeze()});
+	
+	if(hasOrientation){
+		accelUI=new UI('accelerometer ',0,function(v){useAccel=v});
+		accelUI.set(useAccel);
+	}
+	
+	toggleUI();
+	toggleUI();
 }
 
 function initSocket(){
@@ -160,6 +182,98 @@ function initSocket(){
 	
 	socket.connect();
 }
+
+
+function toggleUI(show){
+	showUI=(show==undefined)?!showUI:show; //toggle if no input
+	
+	ui.style.visibility=showUI?'visible':'hidden';
+}
+
+
+function UI(title,type,callback){ //type: 0=checkbox, 1=button, [min,max]=slider
+	
+	var div=document.createElement('div');
+	
+	ui.appendChild(div);
+	
+	if(type==0){ //ckeckbox
+	
+		var label=document.createElement('span');
+		label.innerHTML=title;
+		
+		div.appendChild(label);
+	
+		var check=document.createElement('input');
+		check.type='checkbox';
+		div.appendChild(check);
+		
+		check.onchange=function(){
+			if(callback){
+				callback(check.value);
+			}
+		}
+		
+		this.set=function set(v){
+			check.checked=v;
+		}
+
+	
+	}else if(type==1){ //button
+		var but=document.createElement('input');
+		but.type='button';
+		
+		but.value=title;
+		div.appendChild(but);
+		
+		but.onclick=function(){
+			if(callback){
+				callback();
+			}
+		}
+		this.set=function set(){
+			but.onclick();
+		}
+		
+	}else if(type.length && type.length==2){ //slider
+		var label=document.createElement('span');
+		label.innerHTML=title;
+		
+		div.appendChild(label);
+	
+		var txt=document.createElement('input');
+		txt.type='text';
+		div.appendChild(txt);
+	
+		var range=document.createElement('input');
+		range.type='range';
+		range.min=type[0];
+		range.max=type[1];
+		range.step='any';
+		div.appendChild(range);
+		
+		txt.onchange=function(){
+			range.value=txt.value;
+			if(callback){
+				callback(txt.value);
+			}
+		}
+		range.onchange=function(){
+			txt.value=range.value;
+			if(callback){
+				callback(range.value);
+			}
+		}
+		
+		this.set=function set(v){
+			txt.value=v
+			range.value=v;
+		}
+		
+	}
+}
+
+
 
 function showChatters(chatters){
 	
@@ -357,12 +471,13 @@ function mouseUp(e){
 	}
 }
 
-window.ondeviceorientation=function(e){
-	if(useAccel){
-		gravityY=e.beta/90;
-		gravityX=e.gamma/90;
+
+	window.ondeviceorientation=function(e){
+		if(useAccel){
+			gravityY=e.beta/90;
+			gravityX=e.gamma/90;
+		}
 	}
-}
 
 var avgShake=0;
 
@@ -437,6 +552,8 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	this.vx=vxi;
 	this.vy=vyi;
 	
+	this.dx=this.dy=0;
+	
 	this.type=type||'ball';
 	
 	this.color=color||ballColor;
@@ -458,7 +575,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	this.removed=false;
 	
 
-	this.step=function(){
+	this.step=function step(){
 		
 		//plague
 		if(this.infected){
@@ -474,6 +591,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		this.vx*=1-friction;
 		this.vy*=1-friction;
 		
+		
 //		if(Universal){
 //		    for(var i = 0;i<balls.length;i++){
 //		        if(balls[i]!=this){
@@ -482,10 +600,10 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 //		    }
 //		}
 //		
+		
+		
 		this.x+=this.vx;
 		this.y+=this.vy;
-		
-		
 		
 		
 		//walls
@@ -505,17 +623,39 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		}else{ if(this.x>dims.w-this.r){this.vx*=-1;this.x=dims.w-this.r;};}
 		
 	}
-	
-	this.fG = function(p2){
-	    f = this.m*p2.m*gConst;
+
+	this.fG = function fG(p2){
+		
+	    var min=this.r+p2.r;
+	    min*=min*min; //min^3
+	    
+	    var dx=this.x-p2.x,
+	        dy=this.y-p2.y,
+	    
+	        dd=dx*dx+dy*dy,
+	    
+	        ddd=dd*Math.sqrt(dd); //d^3
+	   	
+	   	
+	    ddd=(ddd>min)?ddd:min; //use the greater of ddd, min
+
+	    var f = (p2.m*gConst)/(ddd);
+	    
+	    this.vx-=f*dx;
+	    this.vy-=f*dy;
+
+/*
+		f = this.m*p2.m*gConst;
 	    r = Math.pow((this.x-p2.x),2)+Math.pow((this.y-p2.y),2)||1;
 	    f = f/r; 
 	    ang = Math.atan2(p2.y-this.y,p2.x-this.x);
 	    this.vy += f*Math.sin(ang)/this.m;
 	    this.vx += f*Math.cos(ang)/this.m;
+*/
+
 	}
 	
-	this.send=function(edge){
+	this.send=function send(edge){
 		
 		if(this.removed)return;
 		
@@ -562,7 +702,13 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		this.div.style.left='0px';
 	}
 	
-	this.upLoc=function(){
+	this.upLoc=function upLoc(){
+		
+		this.x+=this.dx;
+		this.y+=this.dy;
+		
+		this.dx=this.dy=0;
+		
 //		this.div.style.top=this.y-this.r+'px';
 //		this.div.style.left=this.x-this.r+'px';
 		
@@ -574,14 +720,14 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		}
 	}
 	
-	this.setR=function(newR){
+	this.setR=function setR(newR){
 		this.r=newR;
 		this.m=Math.PI*this.r*this.r*this.density;
 		this.div.style.width=Math.round(this.r*2)+'px';
 		this.div.style.height=Math.round(this.r*2)+'px';
 	}
 	
-	this.remove=function(){
+	this.remove=function remove(){
 		if(!this.removed){
 			this.removed=true;
 			container.removeChild(this.div);
@@ -595,7 +741,7 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	this.setR(this.r);
 	
 	//this happens a lot too
-	this.doCollide=function(p){
+	this.doCollide=function doCollide(p){
 		
 		//faster?
 		//if((p.x-this.x)*(p.x-this.x)+(p.y-this.y)*(p.y-this.y)<(p.r+this.r)*(p.r+this.r)){
@@ -634,19 +780,30 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 			p2.vx-=vom*dxu*p1.m;
 			p2.vy-=vom*dyu*p1.m;
  
+ 
+ 
+ 			//this is problematic!//
+ 			
 			//uncollide
 			var dma = dm-p1.r-p2.r;//adjusted for radius
  
-			p1.x+=(dma*dxu)/2;
-			p1.y+=(dma*dyu)/2;
+			p1.dx+=(dma*dxu)/2;
+			p1.dy+=(dma*dyu)/2;
 			
-			p2.x-=(dma*dxu)/2;
-			p2.y-=(dma*dyu)/2;
+			p2.dx-=(dma*dxu)/2;
+			p2.dy-=(dma*dyu)/2;
+//			
+//			p1.x+=(dma*dxu)/2;
+//			p1.y+=(dma*dyu)/2;
+//			
+//			p2.x-=(dma*dxu)/2;
+//			p2.y-=(dma*dyu)/2;
+			
 		}
  
 	}
 	
-	this.infect=function(){
+	this.infect=function infect(){
 		this.type='plagued';
 		this.infected=true;
 		this.color=zombieColor;
@@ -670,7 +827,6 @@ function step(){
 				for(var j in balls)
 					if(i!=j)
 						balls[i].fG(balls[j]);
-						
 	
 		for(var i in balls)balls[i].step();
 
@@ -933,7 +1089,7 @@ function keyDown(e){
 
 	//E=e;
 	
-	if(e.target.id != 'textInput' || e.which==27){
+	if(e.target.tagName != 'INPUT' || e.which==27){
 
 		var code;
 		if (e.keyCode) code = e.keyCode;
@@ -966,6 +1122,8 @@ function keyDown(e){
 			    t = frictionT;
 			    frictionT = friction;
 			    friction = t;
+			    
+				uiFrict.set(friction);
 			    break;
 				
 			case 38: //up
@@ -988,6 +1146,7 @@ function keyDown(e){
 				break;
 			case 65: //a
 				useAccel=!useAccel;
+				accelUI.set(useAccel);
 				break;
 			 case 71: //g
 				gravityX=0;
@@ -1009,6 +1168,21 @@ function keyDown(e){
 			case 49: edgeTabs[1].click(); break; //1
 			case 50: edgeTabs[2].click(); break; //2
 			case 51: edgeTabs[3].click(); break; //3
+			
+			case 219: // [
+				friction-=.001;
+				if(friction<0)friction=0;
+				
+				uiFrict.set(friction);
+
+				break;
+			case 221: // ]
+				friction+=.001;
+				uiFrict.set(friction);
+				break;
+			case 90: // z
+				toggleUI();
+				break;
 		}
 	}
 
