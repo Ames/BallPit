@@ -1,6 +1,10 @@
 var http = require('http');  
 var io = require('socket.io'); // for npm, otherwise use require('./path/to/socket.io') 
+var fs = require('fs'); //for logging
 
+var logStream = fs.createWriteStream('server.log',{ flags: 'a'});
+
+log('**** STARTING SERVER ****');
 
 var server = http.createServer(function(req, res){ 
 
@@ -10,7 +14,6 @@ var server = http.createServer(function(req, res){
 });
 
 server.listen(8124);
-
 
 var spaces={};
 var masters=[];
@@ -197,6 +200,7 @@ function Space(client_){
 	spaces[id]=this;
 	
 	console.log('space '+id+' connected. ('+address+')');	
+	log('space '+id+' connected. ('+address+')');	
 	
 	this.links=[0,0,0,0];
 	
@@ -217,6 +221,8 @@ function Space(client_){
 			data.message=data.message;
 			broadcast(data);
 			//console.log('message: '+data);
+			
+			log('mgs from '+address+': '+data.message);
 		}
 		
 		if(data.ball){
@@ -285,6 +291,8 @@ function Space(client_){
 				spaces[i]=null;
 				//spaces=spaces.splice(i,1);
 				console.log('space '+id+' disconnected.');
+				log('space '+id+' disconnected.');	
+
 			}
 		}
 		
@@ -330,7 +338,10 @@ function Master(client_){
 	
 	client.parent=this;
 
+	var address=client.connection.remoteAddress;	
+
 	console.log('we gained a master.');	
+	log('master connected. ('+address+')');	
 
 	this.handleMessage=function(data){
 		if(data.link){
@@ -352,7 +363,8 @@ function Master(client_){
 			if(masters[i]==this){
 				masters.splice(i,1);
 				console.log('we lost a master.');	
-			}	
+				log('master disconnected.');	
+			}
 		}
 	}
 	
@@ -379,3 +391,18 @@ function Master(client_){
 	
 	this.sendSpaceInfo();
 }
+
+function log(str){
+	
+	str=str?str:'';
+	
+	var d=new Date();
+	var datestr=d.getFullYear()+'-'+twoDigit(d.getMonth())+'-'+
+		twoDigit(d.getDate())+' '+twoDigit(d.getHours())+':'+
+		twoDigit(d.getMinutes())+':'+twoDigit(d.getSeconds());
+	
+	logStream.write(datestr+' '+str+'\n');
+
+}
+
+function twoDigit(n){return (n<10?'0':'')+n}

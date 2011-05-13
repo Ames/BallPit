@@ -45,7 +45,7 @@ var gravityX=0;
 var gravityY=.5;
 
 var friction=.005;
-var frictionT = 0;
+//var frictionT = 0;
 
 var defRad=15;
 
@@ -68,14 +68,18 @@ var run=true;
 var notify = 0;
 
 
-var Universal = 0;
-var gConst = 100;
+//var Universal = 0;
+//var gConst = 100;
+var gConst = 0;
 
+var hasAccel=false;
 var useAccel=true;
 
-var hasOrientation=('ondeviceorientation' in window);
+//var hasOrientation=('ondeviceorientation' in window);
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
+
+var uiGravX,uiGravY,uiFrict,uiGrav;
 
 function init(){
 	//	alert('loaded document!');	
@@ -133,21 +137,39 @@ function init(){
 	
 	resize();
 	
-	uiFrict=new UI('friction ',[0,.5],function(v){friction=v;});
+	uiFrict=new UI('friction ',[0,.2],function(v){friction=v*1;});
 	uiFrict.set(friction);
 	
-	uiGrav=new UI('gravitation ',[0,1000],function(v){gConst=v;});
+	uiGrav=new UI('gravitation ',[-1000,1000],function(v){gConst=v*1;});
 	uiGrav.set(gConst);
 	
+	uiGravX=new UI('gravityX ',[-2,2],function(v){
+		gravityX=v*1;
+		useAccel=false;
+		if(accelUI)accelUI.set(useAccel);
+	});
+	
+	uiGravX.set(gravityX);
+
+	uiGravY=new UI('gravityY ',[-2,2],function(v){
+		gravityY=v*1;
+		useAccel=false;
+		if(accelUI)accelUI.set(useAccel);
+	});
+	uiGravX.set(gravityX);
+
+	
 	new UI('freeze ',1,function(){freeze()});
-	
-	if(hasOrientation){
-		accelUI=new UI('accelerometer ',0,function(v){useAccel=v});
-		accelUI.set(useAccel);
+
+	toggleUI();
+	toggleUI();
+}
+
+function chGrav(){
+	if(uiGravX){
+		uiGravX.set(gravityX);
+		uiGravY.set(gravityY);
 	}
-	
-	toggleUI();
-	toggleUI();
 }
 
 function initSocket(){
@@ -471,13 +493,35 @@ function mouseUp(e){
 	}
 }
 
-
-	window.ondeviceorientation=function(e){
-		if(useAccel){
-			gravityY=e.beta/90;
-			gravityX=e.gamma/90;
-		}
+function handleMozOrientation(e){
+	accelYes();
+	if(useAccel){
+		gravityX=e.x;
+		gravityY=e.y;
+		
+		chGrav();
 	}
+}
+
+window.addEventListener("MozOrientation", handleMozOrientation, true);
+
+window.ondeviceorientation=function(e){
+	accelYes();
+	if(useAccel){
+		gravityY=e.beta/90;
+		gravityX=e.gamma/90;
+		
+		chGrav();
+	}
+}
+
+function accelYes(){
+	if(!hasAccel && ui){
+		hasAccel=true;
+		accelUI=new UI('accelerometer ',0,function(v){useAccel=v});
+		accelUI.set(useAccel);
+	}
+}
 
 var avgShake=0;
 
@@ -517,6 +561,10 @@ if(!ie){
 		if(useAccel){
 			gravityX=accX/10;
 			gravityY=-accY/10;
+			
+			chGrav();
+
+
 		}
 			
 		//}
@@ -822,7 +870,7 @@ function step(){
 	
 	if(run){
 	
-		if(Universal)
+		if(gConst)
 			for(var i in balls)
 				for(var j in balls)
 					if(i!=j)
@@ -1082,6 +1130,35 @@ touchMove=function(e){
 
 var E;
 
+
+var konami=[38,38,40,40,39,37,39,37,66,65,13];
+var kSeq=0;
+
+function doKonami(){
+	//very similar to spawnBurst()
+	
+	var nParts=180;
+	
+	for(var i=0;i<nParts;i++){
+		
+		var r=15*(i%6)+40;
+		var t=Math.PI*2/nParts*i;
+		
+		
+		//var r=Math.random()*dims.w/100;
+		//var t=Math.random()*Math.PI*2;
+		
+		//		new Ball(x,y,vx,vy,data.ball.r,data.ball.color,data.ball.type);
+
+		new Ball(r*Math.cos(t)+dims.w/2,
+	             r*Math.sin(t)+dims.h/2,
+	             ((i%2)*2-1)*r*Math.sin(t)*.03,
+	             -((i%2)*2-1)*r*Math.cos(t)*.03,
+	             (i%6)*.5+4,
+	             'hsl('+t/Math.PI*180+',80%, 50%)'/*,'plagued'*/);
+	}
+}
+
 function keyDown(e){
 	if (!e) var e = window.event;
 
@@ -1094,6 +1171,17 @@ function keyDown(e){
 		var code;
 		if (e.keyCode) code = e.keyCode;
 		else if (e.which) code = e.which;	//lastEvent=e;
+		
+		if(code==konami[kSeq]){
+			kSeq++;
+			if(kSeq==11){
+				kSeq=0;
+				doKonami();	
+			}
+			if(code>60)code=0; //cancel for b and a
+		}else{
+			kSeq=0;
+		}
 		
 		//message(e.keyCode)
 		switch(code){
@@ -1113,44 +1201,55 @@ function keyDown(e){
 			case 88: //x
 				clear();
 				break;
-			case 85: //u
-			    if(Universal){
-			        Universal = 0;
-			    }else{
-			        Universal = 1;
-			    }
-			    t = frictionT;
-			    frictionT = friction;
-			    friction = t;
-			    
-				uiFrict.set(friction);
-			    break;
+//			case 85: //u
+//			    if(Universal){
+//			        Universal = 0;
+//			    }else{
+//			        Universal = 1;
+//			    }
+//			    t = frictionT;
+//			    frictionT = friction;
+//			    friction = t;
+//			    
+//				uiFrict.set(friction);
+//			    break;
 				
 			case 38: //up
 				gravityY-=dG;
+				chGrav();
+
 				break;
 
 			case 40: //down
 				gravityY+=dG;
+				chGrav();
+
 				break;
 				
 			case 39: //right
 				gravityX+=dG;
+				chGrav();
 				break;
 				
 			case 37: //left
 				gravityX-=dG;
+				chGrav();
+
 				break;
 			 case 70: //f
 				freeze();
 				break;
 			case 65: //a
 				useAccel=!useAccel;
-				accelUI.set(useAccel);
+				if(accelUI)accelUI.set(useAccel);
 				break;
 			 case 71: //g
 				gravityX=0;
 				gravityY=0;
+
+				chGrav();
+
+
 				break;
 			 case 191: // /
 				toggleTabs();
