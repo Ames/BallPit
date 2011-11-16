@@ -177,14 +177,19 @@ form{
 
 	background-color:#55f;
 	border: solid 2px black;
-	opacity:.5;
+	opacity:.2;
 	
-	 -webkit-transition: margin .2s ease-out;
-	 -moz-transition: margin .2s ease-out;
+	 -webkit-transition: margin .2s ease-out, opacity .2s;
+	 -moz-transition: margin .2s ease-out, opacity .2s;
 	 
 	/* -webkit-transition: background-color .2s linear;*/
 
+
 }
+.edgeTab:hover{
+	opacity:.4;
+}
+
 .edgeShadow{
 	
 	-webkit-transition: -webkit-box-shadow .2s ease-out;
@@ -201,3 +206,84 @@ form{
 }
 
 
+
+/****** PAC-MAN *******/
+.pac{
+ width:100px;
+ height:100px;
+ position: absolute;
+ top: 200px;
+ left: 300px;
+ display:block;
+ 
+ //-webkit-transition: -webkit-transform .01s;
+
+}
+
+@-webkit-keyframes rotateA {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to { 
+    -webkit-transform: rotate(45deg);
+  }
+}
+@-webkit-keyframes rotateB {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to { 
+    -webkit-transform: rotate(-45deg);
+  }
+}
+
+@-moz-keyframes rotateA{
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to { 
+    -moz-transform: rotate(45deg);
+  }
+}
+@-moz-keyframes rotateB{
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to { 
+    -moz-transform: rotate(-45deg);
+  }
+}
+
+.pacA1, .pacB1{
+    position: absolute; width:100%; height:100%;
+}
+
+.pacA1{
+    /*name duration timing-function delay iteration-count direction*/
+    
+    -webkit-animation: rotateA 0.2s linear 0 infinite alternate;
+    -moz-animation:    rotateA 0.2s linear 0 infinite alternate;
+}
+.pacB1{
+    -webkit-animation: rotateB 0.2s linear 0 infinite alternate;
+    -moz-animation:    rotateB 0.2s linear 0 infinite alternate;
+}
+
+.pacA2,.pacB2{
+ width:100%;
+ height:50%;
+ position:absolute;
+ background:#FFE500;
+}
+
+.pacA2{
+ top:0px;
+ -webkit-border-radius: 500px 500px 0px 0px;
+ -moz-border-radius: 500px 500px 0px 0px;
+}
+
+.pacB2{
+ top:50%;
+ -webkit-border-radius: 0px 0px 500px 500px;
+ -moz-border-radius: 0px 0px 500px 500px;
+}

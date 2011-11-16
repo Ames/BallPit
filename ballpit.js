@@ -9,7 +9,7 @@ var socketPath='http://login.sccs.swarthmore.edu:8124/';
 
 
 //WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMainInsecure.swf';
-WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMain.swf';
+//WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMain.swf';
 
 var scr=document.createElement('script');
 scr.src=socketPath+'socket.io/socket.io.js';
@@ -176,33 +176,43 @@ function initSocket(){
 	
 	if(socket){
 		socket.disconnect();
-		socket=null;
+		socket.socket.connect();
 	}
 	
 	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
 	//var transports=["websocket","flashsocket"];
-	//var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
 	var transports=["websocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"];
+	//var transports=["websocket", "htmlfile", "xhr-multipart", "jsonp-polling"];
+	//var transports=["htmlfile", "xhr-multipart", "jsonp-polling"];
 	
 	//if(WebSocket)var transports=["websocket"];
 	
 	//force opera to use flashsocket
 //	if(io.util.opera) transports=["flashsocket"];
 	
-	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
-	     'rememberTransport':false});
+//	socket = io.connect(socketHost+":"+socketPort);
 
-	socket.on('connect',handleConnect);
-	socket.on('message',handleMessage);
-	socket.on('disconnect',handleDisconnect);
+	socket = io.connect(socketHost+":"+socketPort,{'transports':transports,
+	     'rememberTransport':false});
+	     
+//	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
+//	     'rememberTransport':false});
+
+		
+	//this should only be done once!
+	if(!socket.$events){
+		socket.on('connect',handleConnect);
+		socket.on('message',handleMessage);
+		socket.on('disconnect',handleDisconnect);
+	}
 	
 	socket.sendJSON=function(data){
-		if(socket.connected){
+		if(socket.socket.connected){
 			this.send(JSON.stringify(data));
 		}
 	}
 	
-	socket.connect();
+//	socket.connect();
 }
 
 
@@ -329,7 +339,7 @@ function notifyDisplay(){
 }
 
 function keepAlive(){
-	if(!socket.connected){
+	if(!socket.socket.connected){
 		initSocket();
 		//socket.connect();	
 	}
@@ -608,6 +618,8 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	
 	var zombieColor='rgb(67,67,67)';
 	
+	var pacSpeed=7;
+	
 	this.r=ri || defRad;
 	
 	this.density=.001||density;
@@ -616,10 +628,19 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 	
 	this.div=document.createElement('div');
 	this.div.className='ball';
-	container.appendChild(this.div);
 	
 	this.div.style.backgroundColor=this.color;
 	
+	if(this.type=='pac'){
+	   	this.div.className='pac';
+        
+	   	this.div.style.backgroundColor='';
+	   	
+	   	this.div.innerHTML="<div class='pacA1'><div class='pacA2'></div></div><div class='pacB1'><div class='pacB2'></div></div>";
+	}
+	
+    container.appendChild(this.div);
+
 	this.removed=false;
 	
 
@@ -649,6 +670,27 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 //		}
 //		
 		
+		if(this.type=='pac'){
+			
+			var near=this.nearestBall();
+			
+			var nx, ny;
+			
+			if(near){
+				nx=near.x;
+				ny=near.y;
+				
+				
+				var dst=Math.dist(this.x-near.x,this.y-near.y);
+				
+				if(dst!=0){
+					this.vx=(10*this.vx+(near.x-this.x)/dst*pacSpeed)/11;
+					this.vy=(10*this.vy+(near.y-this.y)/dst*pacSpeed)/11;
+				}
+				
+			}
+		}
+		
 		
 		this.x+=this.vx;
 		this.y+=this.vy;
@@ -670,6 +712,28 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 		if(links[3]){ if(this.x>dims.w)this.send(3);
 		}else{ if(this.x>dims.w-this.r){this.vx*=-1;this.x=dims.w-this.r;};}
 		
+	}
+	
+	this.nearestBall=function(){
+		var min=100000;
+		var imin=-1;
+		
+		
+		for(var i in balls){
+			var b=balls[i];
+			
+			var d=Math.dist(this.x-b.x,this.y-b.y);
+			
+			if(d<min && b!=this){
+				min=d;
+				imin=i;
+			}
+		}
+		if(imin!=-1){
+			return balls[imin];
+		}else{
+			return false;	
+		}
 	}
 
 	this.fG = function fG(p2){
@@ -766,6 +830,13 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 			this.div.style.top=Math.round(this.y-this.r)+'px';
 			this.div.style.left=Math.round(this.x-this.r)+'px';
 		}
+		
+		if(this.type=='pac'){
+			var a=Math.atan2(-this.vy,-this.vx);
+			this.div.style.setProperty('-webkit-transform','rotate('+a+'rad)',"");	
+			this.div.style.setProperty('-moz-transform','rotate('+a+'rad)',"");	
+		}
+		
 	}
 	
 	this.setR=function setR(newR){
@@ -811,6 +882,11 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 
 			if(p1.infected && !p2.infected)p2.infect();
 			if(p2.infected && !p1.infected)p1.infect();
+			
+			if(p1.type=='pac')p1.tryEat(p2);
+			if(p2.type=='pac')p2.tryEat(p1);
+
+			
 		
 			if(!dm)dm+=.001; //don't divide by 0 :)
 
@@ -847,15 +923,35 @@ function Ball(xi,yi,vxi,vyi,ri,color,type,density){
 //			p2.x-=(dma*dxu)/2;
 //			p2.y-=(dma*dyu)/2;
 			
+
 		}
- 
 	}
 	
 	this.infect=function infect(){
-		this.type='plagued';
 		this.infected=true;
 		this.color=zombieColor;
-		this.div.style.backgroundColor=this.color;
+		
+		if(this.type=='pac'){
+			this.div.childNodes[0].firstChild.style.background=this.color;
+			this.div.childNodes[1].firstChild.style.background=this.color;
+		}else{
+			this.div.style.backgroundColor=this.color;
+		}
+		
+		this.type='plagued';
+
+	}
+	
+	this.tryEat=function(p){
+		var angle=Math.atan2(this.y-p.y,this.x-p.x);
+		var myAngle=Math.atan2(-this.vy,-this.vx);
+		
+		var dangle=Math.abs(myAngle-angle);
+		
+		if(dangle<Math.PI/6 && !this.removed){ //no eating if you're dead.
+			p.remove();	
+		}
+		
 	}
 	
 	if(this.type=='plagued'){
@@ -1131,7 +1227,7 @@ touchMove=function(e){
 var E;
 
 
-var konami=[38,38,40,40,39,37,39,37,66,65,13];
+var konami=[38,38,40,40,37,39,37,39,66,65,13];
 var kSeq=0;
 
 function doKonami(){
@@ -1281,6 +1377,9 @@ function keyDown(e){
 				break;
 			case 90: // z
 				toggleUI();
+				break;
+			case 80: // p
+				new Ball(dims.w/2,dims.h/2,0,0,60,"",'pac')
 				break;
 		}
 	}

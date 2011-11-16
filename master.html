@@ -80,10 +80,11 @@ function init(){
 	if(io.util.opera){
 		socket = new io.Socket(socketHost,{'port':socketPort,'transports':["flashsocket"]});
 	}else{
-		socket = new io.Socket(socketHost,{'port':socketPort});
+		//socket = new io.Socket(socketHost,{'port':socketPort});
+		socket = io.connect(socketHost+':'+socketPort);
 	}
 	
-	socket.connect();
+	//socket.connect();
 
 	socket.on('connect',handleConnect);
 	socket.on('message',handleMessage);
@@ -97,8 +98,8 @@ function init(){
 }
 
 function keepAlive(){
-	if(!socket.connected){
-		socket.connect();	
+	if(!socket.socket.connected){
+		socket.socket.connect();	
 	}
 }
 
