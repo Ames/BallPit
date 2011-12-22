@@ -30,6 +30,10 @@ var chatterDiv;
 var notDiv;
 var ui;
 
+var devX=0;
+var devY=0;
+var devZ=0;
+
 var id=0;
 
 var balls=[];
@@ -84,11 +88,11 @@ var uiGravX,uiGravY,uiFrict,uiGrav;
 function init(){
 	//	alert('loaded document!');	
 
-    alert(loadedThings);
+    //alert(loadedThings);
 	loadedThings++;
 	if(loadedThings!=2)return true;
 
-    alert('made it past check~~');
+    //alert('made it past check~~');
 
 	textInput=document.getElementById('textInput');
 	headDiv=document.getElementById('header');
@@ -164,6 +168,7 @@ function init(){
 
 	toggleUI();
 	toggleUI();
+    //alert('done with init');
 }
 
 function chGrav(){
@@ -564,10 +569,9 @@ if(!ie){
 
 		
 		//if(event.accelerationIncludingGravity){
-
-			accX = event.accelerationIncludingGravity.x;
-			accY = event.accelerationIncludingGravity.y;
-			accZ = event.accelerationIncludingGravity.z;
+			accX = devX;
+			accY = devY;
+			accZ = devZ;
 			
 		if(useAccel){
 			gravityX=accX/10;

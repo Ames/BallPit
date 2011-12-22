@@ -52,9 +52,24 @@
 	{
 		// do your thing!
         init();
+        startWatchAccel();
 		//navigator.notification.alert("PhoneGap is working")
 	}
+        
+    function startWatchAccel() {
+            
+            // Update acceleration every 3 seconds
+            var options = { frequency: 40 };
+            
+            watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+    }
     
+    function onSuccess(acceleration){
+        devX = acceleration.x;
+        devY = acceleration.y;
+        devZ = acceleration.z;
+    }
+        
     </script>
   </head>
   <body onload="onBodyLoad()">
