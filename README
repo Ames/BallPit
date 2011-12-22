@@ -3,19 +3,32 @@ BallPit
 BallPit allows linking between the edges of browser windows. Bouncy balls created 
 on one window or 'space' will bounce into linked spaces.
 
-This is quite possibly the most awesome thing that has been done with Javascript by
-any student at Swarthmore College.
+"Universal Attraction" gives all balls a variable amount of gravity.
 
+Create a ball by dragging or pressing K or L.
+If you don't want to think about all of the keybindings, just press Z.
 
-
+Keybindings:
+space: play/pause
+esc: toggle chat window
+L: spawn (burst)
+K: spawn (random)
+X: clear
+U: toggle universal attraction
+[arrows]: tweak gravity
+F: freeze
+A: toggle accelerometer (only works on chrome on apple notebooks)
+G: gravity=0
+/: toggle edge-tabs
+I: infect a random ball
+[0-4]: select edge (same as clicking on it)
+[: decrease friction
+]: increase friction
+Z: toggle the UI
 
 
 TODO:
 - Server:
--- Log stuff:
---- spaces and masters connecting and disconnecting.
---- chat
---- links (?)
---- balls(?!) - perhaps a tally (per host?)
+-- improve logging, perhaps make a semi-public gui to visualize the logs
 -- make routing more efficient
 -- if not routing, make SOMETHING more efficient...

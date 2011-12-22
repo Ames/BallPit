@@ -26,7 +26,8 @@ var pendingLink=false;
 
 // socket.io 
 var socket = io.listen(server);
-socket.on('connection', function(client){ 
+//socket.on('connection', function(client){ 
+socket.sockets.on('connection', function(client){ 
 	// new client is here! 
 	//console.log('connected!');
 	
@@ -172,7 +173,9 @@ function Space(client_){
 	
 	client.parent=this;
 	
-	var address=client.connection.remoteAddress;	
+	//var address=client.connection.remoteAddress;	
+	var address=client.handshake.address.address;	
+//	var address='10.10.10.10';	
 	
 	this.address=address;
 	
@@ -190,7 +193,7 @@ function Space(client_){
 
 
 	// make remy purple
-	if(address=='130.58.193.107') this.hue=268;
+	//if(address=='130.58.193.107') this.hue=268;
 	
 	
 	//console.log('space '+id+' connected. ('+address+')');	
@@ -334,11 +337,16 @@ function Space(client_){
 
 
 function Master(client_){
+	
+	console.log(client_.handshake.address.address);
+	
 	var client=client_;
 	
 	client.parent=this;
 
-	var address=client.connection.remoteAddress;	
+//	var address=client.connection.remoteAddress;	
+	var address=client.handshake.address.address;	
+//	var address='0.0.0.0';	
 
 	console.log('we gained a master.');	
 	log('master connected. ('+address+')');	
