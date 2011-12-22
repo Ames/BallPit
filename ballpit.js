@@ -96,13 +96,12 @@ function init(){
 	
 	container=(document.getElementById('container'));
 	ui=(document.getElementById('ui'));
-
-
+    var paper = Raphael("canvas","100%","100%");
+    var c = paper.circle(50,50,40);
 	if(window.webkitNotifications){
 	    container.onclick=requestPop;   //?!
 	}
-	
-	
+
 	initSocket();
 
 
