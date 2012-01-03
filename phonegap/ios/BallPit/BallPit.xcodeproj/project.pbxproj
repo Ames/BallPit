@@ -258,6 +258,7 @@
 		DB7483CA14A2ACEE00A11969 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = "Swarthmore College";
 			};
 			buildConfigurationList = DB7483CD14A2ACEE00A11969 /* Build configuration list for PBXProject "BallPit" */;
@@ -414,6 +415,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BallPit/BallPit-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "PHONEGAP_FRAMEWORK=YES";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "BallPit/BallPit-Info.plist";
 				OTHER_LDFLAGS = (
 					"-weak_framework",
@@ -441,6 +443,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "BallPit/BallPit-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "PHONEGAP_FRAMEWORK=YES";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "BallPit/BallPit-Info.plist";
 				OTHER_LDFLAGS = (
 					"-weak_framework",
