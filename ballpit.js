@@ -75,6 +75,8 @@ var gConst = 0;
 var hasAccel=false;
 var useAccel=true;
 
+var blackness=false;
+
 //var hasOrientation=('ondeviceorientation' in window);
 
 var ie=(navigator.appName == 'Microsoft Internet Explorer');
@@ -1379,6 +1381,10 @@ function keyDown(e){
 				break;
 			case 80: // p
 				new Ball(dims.w/2,dims.h/2,0,0,60,"",'pac')
+				break;
+			case 192: // `
+				blackness=!blackness;
+				container.style.backgroundColor=blackness?'black':bgColor;
 				break;
 		}
 	}
