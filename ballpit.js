@@ -3,10 +3,12 @@ var socketPort=8124;
 
 //var socketPath=window.location.protocol+"//"+window.location.hostname+":"+socketPort+'/';
 
-var socketHost='login.sccs.swarthmore.edu';
+//var socketHost='login.sccs.swarthmore.edu';
+var socketHost = 'amesbielenberg.com';
 
-var socketPath='http://login.sccs.swarthmore.edu:8124/';
 
+//var socketPath='http://login.sccs.swarthmore.edu:8124/';
+var socketPath='http://amesbielenberg.com:8124/';
 
 //WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMainInsecure.swf';
 //WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMain.swf';
@@ -177,7 +179,7 @@ function initSocket(){
 	
 	if(socket){
 		socket.disconnect();
-		socket.socket.connect();
+		socket.connect();
 	}
 	
 	//["websocket", "flashsocket", "htmlfile", "xhr-multipart", "xhr-polling", "jsonp-polling"]
@@ -208,7 +210,7 @@ function initSocket(){
 	}
 	
 	socket.sendJSON=function(data){
-		if(socket.socket.connected){
+		if(socket.connected){
 			this.send(JSON.stringify(data));
 		}
 	}
@@ -340,7 +342,7 @@ function notifyDisplay(){
 }
 
 function keepAlive(){
-	if(!socket.socket.connected){
+	if(!socket.connected){
 		initSocket();
 		//socket.connect();	
 	}
