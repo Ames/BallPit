@@ -43,11 +43,13 @@ ul{
 
 var socketPort=8124;
 
-var socketHost='login.sccs.swarthmore.edu';
+//var socketHost='login.sccs.swarthmore.edu';
+var socketHost = 'amesbielenberg.com';
 
 //var socketPath=window.location.protocol+"//"+window.location.hostname+":"+socketPort+'/';
 
-var socketPath='http://login.sccs.swarthmore.edu:8124/';
+//var socketPath='http://login.sccs.swarthmore.edu:8124/';
+var socketPath='http://amesbielenberg.com:8124/';
 
 var scr=document.createElement('script');
 scr.src=socketPath+'socket.io/socket.io.js';
@@ -77,12 +79,12 @@ function init(){
 
 	
 	//force opera to use flashsocket
-	if(io.util.opera){
+	//if(io.util.opera){
 		socket = new io.Socket(socketHost,{'port':socketPort,'transports':["flashsocket"]});
-	}else{
+	//}else{
 		//socket = new io.Socket(socketHost,{'port':socketPort});
 		socket = io.connect(socketHost+':'+socketPort);
-	}
+	//}
 	
 	//socket.connect();
 
@@ -98,8 +100,8 @@ function init(){
 }
 
 function keepAlive(){
-	if(!socket.socket.connected){
-		socket.socket.connect();	
+	if(!socket.connected){
+		socket.connect();	
 	}
 }
 
