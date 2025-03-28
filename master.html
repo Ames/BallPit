@@ -41,18 +41,24 @@ ul{
 
 <script type='text/javascript'>
 
-var socketPort=8124;
+// var socketPort=8124;
 
 //var socketHost='login.sccs.swarthmore.edu';
-var socketHost = 'amesbielenberg.com';
+//var socketHost = 'amesbielenberg.com';
+var socketHost = 'gaffney.amesbielenberg.com';
 
 //var socketPath=window.location.protocol+"//"+window.location.hostname+":"+socketPort+'/';
 
 //var socketPath='http://login.sccs.swarthmore.edu:8124/';
-var socketPath='http://amesbielenberg.com:8124/';
+//var socketPath='http://amesbielenberg.com:8124/';
+var socketPath='https://gaffney.amesbielenberg.com/ballpit-socket/';
+
+var socketPrefix = '/ballpit-socket/'
+
 
 var scr=document.createElement('script');
-scr.src=socketPath+'socket.io/socket.io.js';
+// scr.src=socketPath+'socket.io/socket.io.js';
+scr.src=socketPath+'socket.io.js';
 
 WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMain.swf'
 
@@ -80,12 +86,16 @@ function init(){
 	
 	//force opera to use flashsocket
 	//if(io.util.opera){
-		socket = new io.Socket(socketHost,{'port':socketPort,'transports':["flashsocket"]});
+		// socket = new io.Socket(socketHost,{'port':socketPort,'transports':["flashsocket"]});
 	//}else{
 		//socket = new io.Socket(socketHost,{'port':socketPort});
-		socket = io.connect(socketHost+':'+socketPort);
+		// socket = io.connect(socketHost+':'+socketPort);
 	//}
 	
+	socket = io.connect('https://'+socketHost,{
+		'path': socketPrefix
+	});
+
 	//socket.connect();
 
 	socket.on('connect',handleConnect);

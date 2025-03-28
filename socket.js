@@ -1,5 +1,5 @@
 var http = require('http');  
-var io = require('socket.io'); // for npm, otherwise use require('./path/to/socket.io') 
+var socketIO = require('socket.io'); // for npm, otherwise use require('./path/to/socket.io') 
 var fs = require('fs'); //for logging
 
 var logStream = fs.createWriteStream('server.log',{ flags: 'a'});
@@ -14,6 +14,10 @@ var server = http.createServer(function(req, res){
 });
 
 server.listen(8124);
+
+var io = new socketIO.Server({
+  path: "/ballpit-socket/"
+});
 
 var spaces={};
 var masters=[];
@@ -173,9 +177,13 @@ function Space(client_){
 	
 	client.parent=this;
 	
+	// console.log(client)
+
 	//var address=client.connection.remoteAddress;	
-	var address=client.handshake.address.address;	
-//	var address='10.10.10.10';	
+	//var address=client.handshake.address.address;	
+	//var address='10.10.10.10';	
+	//var address=client.handshake.address;
+	var address=client.handshake.headers['x-real-ip']
 	
 	this.address=address;
 	

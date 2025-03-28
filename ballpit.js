@@ -1,20 +1,25 @@
 
-var socketPort=8124;
+//var socketPort=8124;
 
 //var socketPath=window.location.protocol+"//"+window.location.hostname+":"+socketPort+'/';
 
 //var socketHost='login.sccs.swarthmore.edu';
-var socketHost = 'amesbielenberg.com';
-
+//var socketHost = 'amesbielenberg.com';
+// var socketHost = 'ubuntu-thinkcentre-m75q-1';
+var socketHost = 'gaffney.amesbielenberg.com';
 
 //var socketPath='http://login.sccs.swarthmore.edu:8124/';
-var socketPath='http://amesbielenberg.com:8124/';
+//var socketPath='http://amesbielenberg.com:8124/';
+// var socketPath='http://ubuntu-thinkcentre-m75q-1:8124/';
+var socketPath='https://gaffney.amesbielenberg.com/ballpit-socket/';
+
+var socketPrefix = '/ballpit-socket/'
 
 //WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMainInsecure.swf';
 //WEB_SOCKET_SWF_LOCATION=socketPath+'socket.io/lib/vendor/web-socket-js/WebSocketMain.swf';
 
 var scr=document.createElement('script');
-scr.src=socketPath+'socket.io/socket.io.js';
+scr.src=socketPath+'socket.io.js';
 //document.appendChild(scr);
 
 
@@ -195,11 +200,18 @@ function initSocket(){
 	
 //	socket = io.connect(socketHost+":"+socketPort);
 
-	socket = io.connect(socketHost+":"+socketPort,{'transports':transports,
-	     'rememberTransport':false});
+//	socket = io.connect(socketHost+":"+socketPort,{'transports':transports,
+//	     'rememberTransport':false});
 	     
 //	socket = new io.Socket(socketHost,{'port':socketPort,'transports':transports,
 //	     'rememberTransport':false});
+
+	socket = io.connect('https://'+socketHost,{
+		'path': socketPrefix,
+		'transports':transports,
+		'rememberTransport':false
+	});
+
 
 		
 	//this should only be done once!

@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ballpit
+  namespace: default
+  name: ballpit
+spec:
+  selector:
+    matchLabels:
+      app: ballpit
+  template:
+    metadata:
+      labels:
+        app: ballpit
+    spec:
+      containers:
+        - name: ballpit-web
+          image: localhost:32000/ballpit-web:latest
+          ports:
+            - containerPort: 80
+              name: ballpit-web
+              protocol: TCP
+        - name: ballpit-socket
+          image: localhost:32000/ballpit-socket:latest
+          ports:
+            - containerPort: 8124
+              name: ballpit-socket
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: ballpit
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: ballpit-web
+      name: ballpit-web
+    - port: 8124
+      protocol: TCP
+      targetPort: ballpit-socket
+      name: ballpit-socket
+  selector:
+    app: ballpit
+  sessionAffinity: None
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: default
+  name: ballpit
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  tls:
+  - hosts:
+    - gaffney.amesbielenberg.com
+    secretName: gaffney-ingress-tls
+  rules:
+  - host: gaffney.amesbielenberg.com
+    http:
+      paths:
+      - path: /ballpit/
+        pathType: Prefix
+        backend:
+          service:
+            name: ballpit
+            port:
+              number: 80
+      - path: /ballpit-socket/
+        pathType: Prefix
+        backend:
+          service:
+            name: ballpit
+            port:
+              number: 8124

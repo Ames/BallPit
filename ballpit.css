@@ -260,13 +260,17 @@ form{
 
 .pacA1{
     /*name duration timing-function delay iteration-count direction*/
-    
     -webkit-animation: rotateA 0.2s linear 0 infinite alternate;
     -moz-animation:    rotateA 0.2s linear 0 infinite alternate;
+
+    /*duration timing-function delay iteration-count direction name*/
+    animation: 0.2s linear 0s infinite alternate rotateA;
 }
 .pacB1{
     -webkit-animation: rotateB 0.2s linear 0 infinite alternate;
     -moz-animation:    rotateB 0.2s linear 0 infinite alternate;
+
+    animation: 0.2s linear 0s infinite alternate rotateB;
 }
 
 .pacA2,.pacB2{
